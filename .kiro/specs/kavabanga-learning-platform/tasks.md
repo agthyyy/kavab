@@ -1,0 +1,291 @@
+# Implementation Plan: Kavabanga Learning Platform
+
+## Overview
+
+Staged implementation: backend infrastructure first, then Flutter app, then Admin Panel. Each stage ends with a checkpoint.
+
+## Tasks
+
+- [ ] 1. Backend project setup and database
+  - Initialize Node.js + Express project with TypeScript
+  - Configure PostgreSQL connection (pg / knex)
+  - Create migrations for all tables per design.md schema
+  - Configure Firebase Admin SDK (Storage + FCM)
+  - Configure Jest + fast-check for testing
+  - _Requirements: 1.6, 10.1_
+
+- [ ] 2. Authentication backend (`/api/auth`)
+  - [ ] 2.1 Implement `POST /api/auth/login` with bcrypt password hashing, JWT access + refresh tokens
+    - Store refresh token in DB, access token stateless (30-day session via refresh)
+    - Implement failed attempt counter (in-memory TTL 15 min, lock after 5 attempts)
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.6_
+  - [ ]* 2.2 Property test: successful auth returns token
+    - Property 1: Successful authentication returns token
+    - Validates: Requirements 1.1, 2.1
+  - [ ]* 2.3 Property test: invalid credentials are rejected
+    - Property 2: Invalid credentials are rejected
+    - Validates: Requirements 1.2
+  - [ ]* 2.4 Unit test: lockout after 5 failed attempts
+    - Example: 5 attempts -> 423, 6th attempt -> 423 with TTL
+    - _Requirements: 1.3_
+  - [ ] 2.5 Implement `POST /api/auth/refresh` and `POST /api/auth/logout`
+    - Logout invalidates refresh token in DB
+    - _Requirements: 1.4, 1.5_
+  - [ ]* 2.6 Property test: logout invalidates session
+    - Property 3: Logout invalidates session
+    - Validates: Requirements 1.5
+  - [ ] 2.7 Implement JWT middleware for protected routes
+    - _Requirements: 1.6_
+
+- [ ] 3. Checkpoint - authentication
+  - Ensure all tests pass. Clarify implementation questions with user.
+
+- [ ] 4. User management backend (`/api/admin/users`)
+  - [ ] 4.1 Implement `POST /api/admin/users` - create employee with role and login uniqueness validation
+    - Hash password on creation
+    - _Requirements: 2.1, 2.2, 2.4_
+  - [ ]* 4.2 Property test: login uniqueness on user creation
+    - Property 4: Login uniqueness on user creation
+    - Validates: Requirements 2.2
+  - [ ]* 4.3 Property test: user role always from allowed set
+    - Property 6: User role always from allowed set
+    - Validates: Requirements 2.4
+  - [ ] 4.4 Implement `PATCH /api/admin/users/:id` - update and deactivate employee
+    - Deactivation immediately blocks login (check is_active in auth middleware)
+    - _Requirements: 2.3_
+  - [ ]* 4.5 Property test: deactivation immediately blocks access
+    - Property 5: Deactivation immediately blocks access
+    - Validates: Requirements 2.3
+  - [ ] 4.6 Implement `GET /api/admin/users` - employee list
+    - _Requirements: 2.1_
+
+- [ ] 5. Content management backend (`/api/admin` + `/api/content`)
+  - [ ] 5.1 Implement course CRUD: `POST /api/admin/courses`, `PUT /api/admin/courses/:id`, `POST /api/admin/courses/:id/publish`
+    - Publishing makes course available for assignment
+    - _Requirements: 10.1, 10.6_
+  - [ ]* 5.2 Property test: course unavailable for assignment before publishing
+    - Property 25: Course unavailable for assignment before publishing
+    - Validates: Requirements 10.6
+  - [ ] 5.3 Implement module and lesson CRUD: `POST /api/admin/modules`, `POST /api/admin/lessons`
+    - Validate pass_threshold in range [1, 100]
+    - _Requirements: 10.1, 10.2, 10.4_
+  - [ ]* 5.4 Property test: quiz pass threshold in range [1, 100]
+    - Property 24: Quiz pass threshold in range [1, 100]
+    - Validates: Requirements 10.4
+  - [ ] 5.5 Implement media upload: `POST /api/content/media/upload-url` - presigned URL for Firebase Storage
+    - Validate formats (JPEG, PNG, WebP <= 10MB; MP4 <= 500MB)
+    - _Requirements: 10.2_
+  - [ ] 5.6 Implement quiz and question CRUD: `POST /api/admin/quizzes`, questions with question_type validation
+    - _Requirements: 5.1, 10.3, 10.4, 10.5_
+  - [ ]* 5.7 Property test: question types limited to allowed set
+    - Property 16: Question types limited to allowed set
+    - Validates: Requirements 5.1, 10.3
+  - [ ] 5.8 Implement `GET /api/content/courses`, `GET /api/content/courses/:id/tree`, `GET /api/content/lessons/:id`, `GET /api/content/quizzes/:id`
+    - Round-trip content: lesson blocks returned in same order
+    - _Requirements: 3.1, 4.1_
+  - [ ]* 5.9 Property test: lesson content round-trip
+    - Property 11: Lesson content round-trip
+    - Validates: Requirements 4.1, 10.2
+
+- [ ] 6. Progress and gamification backend (`/api/progress`)
+  - [ ] 6.1 Implement `POST /api/progress/lessons/:id/complete` - complete lesson, award XP, record in xp_history
+    - Check lesson not already completed; award xp_reward; update user_progress
+    - _Requirements: 4.4, 6.1, 6.5_
+  - [ ]* 6.2 Property test: completing lesson awards XP and marks lesson completed
+    - Property 12: Completing lesson awards XP and marks lesson completed
+    - Validates: Requirements 4.4, 6.1
+  - [ ]* 6.3 Property test: XP history contains record after each award
+    - Property 19: XP history contains record after each award
+    - Validates: Requirements 6.5
+  - [ ] 6.4 Implement `POST /api/progress/quizzes/:id/submit` - submit answers, calculate result, award XP
+    - Score formula: floor(correct / total * 100)
+    - XP for quiz: round(score / 100 * xp_max)
+    - If score >= pass_threshold -> passed = true, unlock next module
+    - _Requirements: 5.2, 5.3, 5.4, 5.5, 6.2_
+  - [ ]* 6.5 Property test: quiz score calculated as percentage of correct answers
+    - Property 13: Quiz score calculated as percentage of correct answers
+    - Validates: Requirements 5.2
+  - [ ]* 6.6 Property test: XP for quiz proportional to score
+    - Property 17: XP for quiz proportional to score
+    - Validates: Requirements 6.2
+  - [ ]* 6.7 Property test: quiz not passed when score below threshold
+    - Property 15: Quiz not passed when score below threshold
+    - Validates: Requirements 5.4
+  - [ ]* 6.8 Property test: error review contains correct answers for wrong responses
+    - Property 14: Error review contains correct answers for wrong responses
+    - Validates: Requirements 5.3
+  - [ ] 6.9 Implement module unlock logic and learning tree statuses
+    - Each module has exactly one status: locked | available | completed
+    - Locked module returns 403 on content request
+    - _Requirements: 3.1, 3.2, 3.3_
+  - [ ]* 6.10 Property test: each module in tree has valid status
+    - Property 7: Each module in tree has valid status
+    - Validates: Requirements 3.1
+  - [ ]* 6.11 Property test: locked module inaccessible for reading
+    - Property 8: Locked module inaccessible for reading
+    - Validates: Requirements 3.2
+  - [ ]* 6.12 Property test: passing quiz unlocks next module
+    - Property 9: Passing quiz unlocks next module
+    - Validates: Requirements 3.3, 5.5
+  - [ ]* 6.13 Property test: first opened lesson is first uncompleted
+    - Property 10: First opened lesson is first uncompleted
+    - Validates: Requirements 3.5
+
+- [ ] 7. Levels, achievements and streak backend
+  - [ ] 7.1 Implement level-up on XP threshold in lesson complete and quiz submit endpoints
+    - _Requirements: 6.3, 6.4_
+  - [ ]* 7.2 Property test: level-up on reaching XP threshold
+    - Property 18: Level-up on reaching XP threshold
+    - Validates: Requirements 6.3
+  - [ ] 7.3 Implement achievement system: condition checking and awarding on lesson/quiz completion
+    - Conditions: quiz_perfect, streak_days (7/30/100), lessons_count
+    - Achievement awarded exactly once (upsert / duplicate check)
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 8.4_
+  - [ ]* 7.4 Property test: achievement awarded on condition and not duplicated
+    - Property 20: Achievement awarded on condition and not duplicated
+    - Validates: Requirements 7.1, 7.2, 7.4, 8.4
+  - [ ] 7.5 Implement streak logic: increment on activity, reset on missed day
+    - Update streak and last_activity_date in user_progress on each lesson/quiz completion
+    - _Requirements: 8.1, 8.2, 8.3_
+  - [ ]* 7.6 Property test: streak increments by 1 on daily activity
+    - Property 21: Streak increments by 1 on daily activity
+    - Validates: Requirements 8.1
+  - [ ]* 7.7 Property test: streak resets on missed day
+    - Property 22: Streak resets on missed day
+    - Validates: Requirements 8.2
+  - [ ] 7.8 Implement streak reset cron-job (daily at midnight) and reminder cron-job (3 hours before end of day)
+    - _Requirements: 8.2, 11.2, 11.4_
+  - [ ]* 7.9 Property test: reminder cron-job selects correct recipients
+    - Property 28: Reminder cron-job selects correct recipients
+    - Validates: Requirements 11.2, 11.4
+  - [ ] 7.10 Implement `GET /api/progress/me`, `GET /api/progress/me/achievements`, `GET /api/progress/me/xp-history`
+    - Course completion percentage: floor(completed_lessons / total_lessons * 100)
+    - _Requirements: 6.4, 6.5, 7.2, 8.3, 9.1, 9.2, 9.3_
+  - [ ]* 7.11 Property test: course completion percentage calculated correctly
+    - Property 23: Course completion percentage calculated correctly
+    - Validates: Requirements 9.3
+
+- [ ] 8. Push notifications backend (FCM)
+  - [ ] 8.1 Implement FCM token storage: `POST /api/notifications/token` (upsert in fcm_tokens)
+    - _Requirements: 11.3_
+  - [ ] 8.2 Implement FCM notification on course assignment (`POST /api/admin/users/:id/courses`)
+    - Notification sent only to users with active FCM token
+    - _Requirements: 11.1, 11.3_
+  - [ ]* 8.3 Unit test: course assignment triggers FCM notification
+    - Example: user with token receives notification; without token - does not
+    - _Requirements: 11.1_
+  - [ ]* 8.4 Property test: notifications not sent to users without FCM token
+    - Property 27: Notifications not sent to users without FCM token
+    - Validates: Requirements 11.3
+  - [ ] 8.5 Implement lesson/quiz editing without changing completion status for employees who finished
+    - _Requirements: 10.7_
+  - [ ]* 8.6 Property test: editing lesson does not affect employees who completed it
+    - Property 26: Editing lesson does not affect employees who completed it
+    - Validates: Requirements 10.7
+
+- [ ] 9. Checkpoint - backend complete
+  - Ensure all tests pass. Clarify implementation questions with user.
+
+- [ ] 10. Flutter project: structure and core
+  - Initialize Flutter project with Clean Architecture (core/, features/)
+  - Configure dependencies: dio, flutter_bloc, get_it, fpdart, flutter_secure_storage, shared_preferences, firebase_core, firebase_messaging, video_player, cached_network_image, glados
+  - Implement core/network/ - Dio client with JWT interceptor (auto-refresh token)
+  - Implement core/storage/ - SecureStorage for tokens, SharedPreferences for settings
+  - Implement core/error/ - Failure classes: NetworkFailure, AuthFailure, ServerFailure, CacheFailure
+  - Configure injection_container.dart (get_it)
+  - _Requirements: 1.4, 1.6, 4.3_
+
+- [ ] 11. Flutter - authentication feature
+  - [ ] 11.1 Implement domain layer: UserEntity, AuthRepository interface, LoginUseCase, LogoutUseCase, RefreshTokenUseCase
+    - _Requirements: 1.1, 1.5_
+  - [ ] 11.2 Implement data layer: AuthRemoteDataSource (Dio), AuthRepositoryImpl
+    - _Requirements: 1.1, 1.2, 1.3, 1.5_
+  - [ ] 11.3 Implement AuthCubit (states: Initial, Loading, Authenticated, Unauthenticated, Error) and login screen
+    - Show error "Invalid login or password" and lockout message
+    - _Requirements: 1.1, 1.2, 1.3_
+  - [ ]* 11.4 Widget test: login screen shows errors and loading states
+    - _Requirements: 1.2, 1.3_
+
+- [ ] 12. Flutter - learning tree feature
+  - [ ] 12.1 Implement domain layer: ModuleNode, ModuleStatus, LearningTreeRepository, GetLearningTreeUseCase
+    - _Requirements: 3.1, 3.2, 3.4_
+  - [ ] 12.2 Implement data layer: LearningTreeRemoteDataSource, LearningTreeRepositoryImpl
+    - _Requirements: 3.1_
+  - [ ] 12.3 Implement LearningTreeBloc (Loading, Loaded, Error) and main screen with module tree
+    - Three visual node states: completed / available / locked
+    - Show XP, level, streak on main screen
+    - _Requirements: 3.1, 3.2, 3.4, 3.5_
+  - [ ]* 12.4 Property test (Dart/glados): each module has valid status
+    - Property 7: Each module in tree has valid status
+    - Validates: Requirements 3.1
+  - [ ]* 12.5 Widget test: tree shows three module states correctly
+    - _Requirements: 3.1, 3.2_
+
+- [x] 13. Flutter - lesson feature
+  - [x] 13.1 Implement domain layer: LessonEntity, LessonBlock (sealed: TextBlock, ImageBlock, VideoBlock), LessonRepository, GetLessonUseCase, CompleteLessonUseCase
+    - _Requirements: 4.1, 4.4_
+  - [x] 13.2 Implement data layer: LessonRemoteDataSource, LessonRepositoryImpl
+    - _Requirements: 4.1_
+  - [x] 13.3 Implement LessonCubit (Loading, Loaded, Completing, Completed, Error) and lesson screen
+    - Render blocks: text, CachedNetworkImage for images, VideoPlayerController for video
+    - Video controls: play/pause, seek, volume
+    - Offline mode: NetworkFailure -> "No connection" message + Retry button
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+  - [ ]* 13.4 Widget test: correct render of content blocks (text, image, video)
+    - _Requirements: 4.1_
+
+- [x] 14. Flutter - quiz feature
+  - [x] 14.1 Implement domain layer: QuestionEntity, QuestionType, AnswerOption, QuizRepository, GetQuizUseCase, SubmitQuizUseCase
+    - _Requirements: 5.1, 5.2_
+  - [x] 14.2 Implement data layer: QuizRemoteDataSource, QuizRepositoryImpl
+    - _Requirements: 5.1_
+  - [x] 14.3 Implement QuizBloc (Loading, InProgress, Submitting, Result, Error) and quiz screen
+    - Widgets for 4 question types: single, multiple, matching, true_false
+    - Remaining questions counter
+    - Result screen with error review (correct answer + explanation)
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
+  - [ ]* 14.4 Widget test: question counter displays correctly
+    - _Requirements: 5.6_
+
+- [x] 15. Flutter - gamification and profile
+  - [x] 15.1 Implement GamificationCubit and UserProgressEntity (XP, level, streak, achievements)
+    - Animated notification on level-up and achievement unlock
+    - _Requirements: 6.3, 6.4, 7.1_
+  - [x] 15.2 Implement ProfileCubit and profile screen
+    - Show: name, role, level, XP, completed lessons/quizzes, streak, achievements (grid), course completion percentage
+    - Tap on achievement -> name, description, date
+    - _Requirements: 9.1, 9.2, 9.3, 9.4_
+
+- [x] 16. Flutter - push notifications
+  - [x] 16.1 Implement NotificationCubit: request FCM permissions, get token, send token to backend
+    - _Requirements: 11.1, 11.3_
+  - [x] 16.2 Implement incoming FCM notification handling (foreground + background)
+    - _Requirements: 11.1, 11.2, 11.4_
+
+- [ ] 17. Checkpoint - Flutter app
+  - Ensure all tests pass. Clarify implementation questions with user.
+
+- [x] 18. Admin Panel (Next.js)
+  - [x] 18.1 Initialize Next.js project with TypeScript, configure admin authentication (JWT)
+    - _Requirements: 2.1_
+  - [x] 18.2 Implement employee management pages: list, create, edit, deactivate, assign courses
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+  - [x] 18.3 Implement course management pages: create, edit, publish, manage modules
+    - _Requirements: 10.1, 10.6_
+  - [x] 18.4 Implement lesson editor: add text blocks, upload images and video via presigned URL
+    - Client-side format and size validation
+    - _Requirements: 10.2, 10.5_
+  - [x] 18.5 Implement quiz editor: create questions of 4 types, configure pass threshold and XP
+    - _Requirements: 5.1, 10.3, 10.4, 10.5_
+  - [x] 18.6 Implement achievement management page: create with configurable conditions
+    - _Requirements: 7.3_
+
+- [ ] 19. Final checkpoint
+  - Ensure all tests pass. Clarify implementation questions with user.
+
+## Notes
+
+- Tasks marked with * are optional (tests), can be skipped for fast MVP
+- Each task references specific requirements for traceability
+- Property tests use fast-check (Node.js) and glados (Flutter/Dart), minimum 100 iterations
+- Unit tests cover specific examples and edge cases
