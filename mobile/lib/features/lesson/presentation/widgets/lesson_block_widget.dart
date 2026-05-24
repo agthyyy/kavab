@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:kavabanga/core/widgets/html_content.dart';
 import 'package:kavabanga/features/lesson/domain/entities/lesson_entity.dart';
 import 'package:kavabanga/features/lesson/presentation/widgets/video_block_widget.dart';
 
@@ -12,9 +13,27 @@ class LessonBlockWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: switch (block) {
-        TextBlock(:final content) => Text(
-            content,
-            style: const TextStyle(fontSize: 16, height: 1.6),
+        TextBlock(:final content) => Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: HtmlContent(
+              htmlData: content,
+              defaultTextStyle: const TextStyle(
+                fontSize: 16, 
+                height: 1.6,
+                color: Color(0xFF333333),
+              ),
+            ),
           ),
         ImageBlock(:final url, :final caption) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

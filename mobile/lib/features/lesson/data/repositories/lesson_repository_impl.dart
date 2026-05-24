@@ -26,10 +26,10 @@ class LessonRepositoryImpl implements LessonRepository {
   }
 
   @override
-  Future<Either<Failure, int>> completeLesson(String lessonId) async {
+  Future<Either<Failure, LessonCompleteResult>> completeLesson(String lessonId) async {
     try {
-      final xp = await dataSource.completeLesson(lessonId);
-      return Right(xp);
+      final result = await dataSource.completeLesson(lessonId);
+      return Right(result);
     } on DioException catch (e) {
       return Left(ServerFailure(e.message ?? 'Server error'));
     } catch (e) {

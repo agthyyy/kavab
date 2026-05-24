@@ -1,27 +1,57 @@
 import 'package:kavabanga/core/network/api_client.dart';
 import 'package:kavabanga/core/network/api_constants.dart';
-import 'package:kavabanga/features/gamification/data/models/user_progress_model.dart';
-import 'package:kavabanga/features/gamification/domain/entities/user_progress_entity.dart';
 
 abstract class GamificationRemoteDataSource {
-  Future<UserProgressEntity> getUserProgress();
+  Future<Map<String, dynamic>> getGamificationOverview();
+  Future<List<dynamic>> getDailyQuests();
+  Future<List<dynamic>> getUserTitles();
+  Future<Map<String, dynamic>> getUserEnergy();
+  Future<List<dynamic>> getUserCards();
+  Future<void> setActiveTitle(String titleId);
 }
 
-class GamificationRemoteDataSourceImpl
-    implements GamificationRemoteDataSource {
+class GamificationRemoteDataSourceImpl implements GamificationRemoteDataSource {
   final ApiClient apiClient;
   GamificationRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<UserProgressEntity> getUserProgress() async {
-    final progressRes = await apiClient.get(ApiConstants.progressMe);
-    final achievementsRes = await apiClient.get(ApiConstants.achievements);
+  Future<Map<String, dynamic>> getGamificationOverview() async {
+    final response = await apiClient.get('/api/gamification/overview');
+    return response.data as Map<String, dynamic>;
+  }
 
-    final progressData =
-        progressRes.data as Map<String, dynamic>;
-    progressData['achievements'] =
-        (achievementsRes.data as List<dynamic>?) ?? [];
+  @override
+  Future<List<dynamic>> getDailyQuests() async {
+    final response = await apiClient.get('/api/gamification/daily-quests');
+    final data = response.data as Map<String, dynamic>;
+    return data['quests'] as List<dynamic>;
+  }
 
-    return UserProgressModel.fromJson(progressData);
+  @override
+  Future<List<dynamic>> getUserTitles() async {
+    final response = await apiClient.get('/api/gamification/titles');
+    final data = response.data as Map<String, dynamic>;
+    return data['titles'] as List<dynamic>;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserEnergy() async {
+    final response = await apiClient.get('/api/gamification/energy');
+    final data = response.data as Map<String, dynamic>;
+    return data['energy'] as Map<String, dynamic>;
+  }
+
+  @override
+  Future<List<dynamic>> getUserCards() async {
+    final response = await apiClient.get('/api/gamification/cards');
+    final data = response.data as Map<String, dynamic>;
+    return data['cards'] as List<dynamic>;
+  }
+
+  @override
+  Future<void> setActiveTitle(String titleId) async {
+    await apiClient.post('/api/gamification/titles/activate', data: {
+      'titleId': titleId,
+    });
   }
 }

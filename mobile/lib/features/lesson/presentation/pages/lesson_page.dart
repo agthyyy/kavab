@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kavabanga/core/widgets/xp_gain_overlay.dart';
+import 'package:kavabanga/core/widgets/html_content.dart';
 import 'package:kavabanga/features/lesson/presentation/cubit/lesson_cubit.dart';
 import 'package:kavabanga/features/lesson/presentation/widgets/lesson_block_widget.dart';
 import 'package:kavabanga/injection_container.dart';
@@ -29,16 +30,21 @@ class _LessonView extends StatelessWidget {
         if (state is LessonCompleted) {
           final lesson = state.lesson;
           // Show XP popup then navigate
+          final delay = state.xpEarned > 0 ? 900 : 100;
           if (state.xpEarned > 0) {
             showXpGain(context, state.xpEarned);
           }
-          Future.delayed(const Duration(milliseconds: 900), () {
+          Future.delayed(Duration(milliseconds: delay), () {
             if (!context.mounted) return;
+            print('[LessonCompleted] quizId: ${lesson.quizId}, nextLessonId: ${lesson.nextLessonId}');
             if (lesson.quizId != null) {
+              print('[LessonCompleted] Navigating to quiz: ${lesson.quizId}');
               Navigator.of(context).pushReplacementNamed('/quiz', arguments: lesson.quizId);
             } else if (lesson.nextLessonId != null) {
+              print('[LessonCompleted] Navigating to next lesson: ${lesson.nextLessonId}');
               Navigator.of(context).pushReplacementNamed('/lesson', arguments: lesson.nextLessonId);
             } else {
+              print('[LessonCompleted] Popping back');
               Navigator.of(context).pop(true);
             }
           });
@@ -102,13 +108,13 @@ class _LessonView extends StatelessWidget {
         String btnLabel;
         IconData btnIcon;
         if (hasQuiz) {
-          btnLabel = 'Complete & Take Quiz';
+          btnLabel = 'Завершить и пройти тест';
           btnIcon = Icons.quiz_rounded;
         } else if (hasNext) {
-          btnLabel = 'Complete & Next Lesson';
+          btnLabel = 'Завершить и следующий урок';
           btnIcon = Icons.arrow_forward_rounded;
         } else {
-          btnLabel = 'Complete Lesson';
+          btnLabel = 'Завершить урок';
           btnIcon = Icons.check_rounded;
         }
 
@@ -152,9 +158,9 @@ class _LessonView extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          lesson.description!,
-                          style: const TextStyle(
+                        child: HtmlContent(
+                          htmlData: lesson.description!,
+                          defaultTextStyle: const TextStyle(
                             fontSize: 14,
                             color: Colors.white,
                             height: 1.6,
@@ -200,7 +206,7 @@ class _LessonView extends StatelessWidget {
                         )
                       : Icon(btnIcon),
                   label: Text(
-                    isCompleting ? 'Saving...' : btnLabel,
+                    isCompleting ? 'Сохранение...' : btnLabel,
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold),
                   ),

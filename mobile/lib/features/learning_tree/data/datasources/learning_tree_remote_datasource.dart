@@ -1,12 +1,13 @@
 import 'package:kavabanga/core/network/api_client.dart';
 import 'package:kavabanga/core/network/api_constants.dart';
+import 'package:kavabanga/features/learning_tree/data/models/course_model.dart';
 import 'package:kavabanga/features/learning_tree/data/models/module_node_model.dart';
 import 'package:kavabanga/features/learning_tree/data/models/user_progress_model.dart';
 
 abstract class LearningTreeRemoteDataSource {
   Future<List<ModuleNodeModel>> getCourseTree(String courseId);
   Future<UserProgressModel> getUserProgress();
-  Future<List<Map<String, dynamic>>> getCourses();
+  Future<List<CourseModel>> getCourses();
 }
 
 class LearningTreeRemoteDataSourceImpl implements LearningTreeRemoteDataSource {
@@ -36,9 +37,11 @@ class LearningTreeRemoteDataSourceImpl implements LearningTreeRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getCourses() async {
+  Future<List<CourseModel>> getCourses() async {
     final response = await _apiClient.dio.get(ApiConstants.courses);
     final data = response.data as List<dynamic>;
-    return data.cast<Map<String, dynamic>>();
+    return data
+        .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

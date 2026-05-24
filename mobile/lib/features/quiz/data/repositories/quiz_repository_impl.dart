@@ -11,11 +11,17 @@ class QuizRepositoryImpl implements QuizRepository {
 
   @override
   Future<Either<Failure, QuizEntity>> getQuiz(String quizId) async {
+    print('[QuizRepository] getQuiz called with quizId: $quizId');
     try {
-      return Right(await dataSource.getQuiz(quizId));
+      print('[QuizRepository] Calling dataSource.getQuiz...');
+      final result = await dataSource.getQuiz(quizId);
+      print('[QuizRepository] Success: got quiz with ${result.questions.length} questions');
+      return Right(result);
     } on DioException catch (e) {
+      print('[QuizRepository] DioException: ${e.message}');
       return Left(ServerFailure(e.message ?? 'Server error'));
     } catch (e) {
+      print('[QuizRepository] General exception: $e');
       return Left(ServerFailure(e.toString()));
     }
   }

@@ -1,35 +1,42 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:kavabanga/features/gamification/domain/entities/user_progress_entity.dart';
-import 'package:kavabanga/features/gamification/domain/repositories/gamification_repository.dart';
+import 'package:kavabanga/features/gamification/data/datasources/gamification_remote_datasource.dart';
 
 part 'gamification_state.dart';
 
 class GamificationCubit extends Cubit<GamificationState> {
-  final GamificationRepository repository;
+  final GamificationRemoteDataSource dataSource;
 
-  GamificationCubit({required this.repository}) : super(GamificationInitial());
+  GamificationCubit({required this.dataSource}) : super(GamificationInitial());
 
-  Future<void> loadProgress() async {
+  Future<void> loadGamificationData() async {
     emit(GamificationLoading());
-    final result = await repository.getUserProgress();
-    result.fold(
-      (f) => emit(GamificationError(f.message)),
-      (progress) => emit(GamificationLoaded(progress)),
-    );
-  }
-
-  void notifyLevelUp(int newLevel, String levelName) {
-    final s = state;
-    if (s is GamificationLoaded) {
-      emit(GamificationLevelUp(progress: s.progress, newLevel: newLevel, levelName: levelName));
+    try {
+      final overview = await dataSource.getGamificationOverview();
+      emit(GamificationLoaded(
+        dailyQuests: overview['dailyQuests']['quests'] ?? [],
+        completedQuestsCount: overview['dailyQuests']['completed'] ?? 0,
+        totalQuestsCount: overview['dailyQuests']['total'] ?? 0,
+        titles: overview['titles']['active'] != null ? [overview['titles']['active']] : [],
+        activeTitle: overview['titles']['active'],
+        unlockedTitlesCount: overview['titles']['unlocked'] ?? 0,
+        totalTitlesCount: overview['titles']['total'] ?? 0,
+        energy: overview['energy'],
+        cardsCount: overview['collection']['cards'] ?? 0,
+        totalCardsCount: overview['collection']['totalCards'] ?? 0,
+        rareCardsCount: overview['collection']['rareCards'] ?? 0,
+      ));
+    } catch (e) {
+      emit(GamificationError(e.toString()));
     }
   }
 
-  void notifyAchievement(AchievementEntity achievement) {
-    final s = state;
-    if (s is GamificationLoaded) {
-      emit(GamificationAchievementUnlocked(progress: s.progress, achievement: achievement));
+  Future<void> setActiveTitle(String titleId) async {
+    try {
+      await dataSource.setActiveTitle(titleId);
+      await loadGamificationData(); // Refresh data
+    } catch (e) {
+      emit(GamificationError(e.toString()));
     }
   }
 }

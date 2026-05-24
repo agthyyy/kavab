@@ -11,34 +11,46 @@ class GamificationInitial extends GamificationState {}
 class GamificationLoading extends GamificationState {}
 
 class GamificationLoaded extends GamificationState {
-  final UserProgressEntity progress;
-  const GamificationLoaded(this.progress);
-  @override
-  List<Object?> get props => [progress];
-}
+  final List<dynamic> dailyQuests;
+  final int completedQuestsCount;
+  final int totalQuestsCount;
+  final List<dynamic> titles;
+  final dynamic activeTitle;
+  final int unlockedTitlesCount;
+  final int totalTitlesCount;
+  final Map<String, dynamic> energy;
+  final int cardsCount;
+  final int totalCardsCount;
+  final int rareCardsCount;
 
-class GamificationLevelUp extends GamificationState {
-  final UserProgressEntity progress;
-  final int newLevel;
-  final String levelName;
-  const GamificationLevelUp({
-    required this.progress,
-    required this.newLevel,
-    required this.levelName,
+  const GamificationLoaded({
+    required this.dailyQuests,
+    required this.completedQuestsCount,
+    required this.totalQuestsCount,
+    required this.titles,
+    required this.activeTitle,
+    required this.unlockedTitlesCount,
+    required this.totalTitlesCount,
+    required this.energy,
+    required this.cardsCount,
+    required this.totalCardsCount,
+    required this.rareCardsCount,
   });
-  @override
-  List<Object?> get props => [progress, newLevel, levelName];
-}
 
-class GamificationAchievementUnlocked extends GamificationState {
-  final UserProgressEntity progress;
-  final AchievementEntity achievement;
-  const GamificationAchievementUnlocked({
-    required this.progress,
-    required this.achievement,
-  });
   @override
-  List<Object?> get props => [progress, achievement];
+  List<Object?> get props => [
+    dailyQuests,
+    completedQuestsCount,
+    totalQuestsCount,
+    titles,
+    activeTitle,
+    unlockedTitlesCount,
+    totalTitlesCount,
+    energy,
+    cardsCount,
+    totalCardsCount,
+    rareCardsCount,
+  ];
 }
 
 class GamificationError extends GamificationState {

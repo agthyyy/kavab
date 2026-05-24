@@ -1,5 +1,20 @@
 import 'package:equatable/equatable.dart';
 
+class LessonCompleteResult extends Equatable {
+  final int xpEarned;
+  final String? quizId;
+  final String? nextLessonId;
+
+  const LessonCompleteResult({
+    required this.xpEarned,
+    this.quizId,
+    this.nextLessonId,
+  });
+
+  @override
+  List<Object?> get props => [xpEarned, quizId, nextLessonId];
+}
+
 sealed class LessonBlock extends Equatable {
   const LessonBlock();
 }

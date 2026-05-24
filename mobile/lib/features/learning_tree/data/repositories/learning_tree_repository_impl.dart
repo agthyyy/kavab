@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:kavabanga/core/error/failures.dart';
 import 'package:kavabanga/features/learning_tree/data/datasources/learning_tree_remote_datasource.dart';
+import 'package:kavabanga/features/learning_tree/domain/entities/course_entity.dart';
 import 'package:kavabanga/features/learning_tree/domain/entities/module_node.dart';
 import 'package:kavabanga/features/learning_tree/domain/entities/user_progress_summary.dart';
 import 'package:kavabanga/features/learning_tree/domain/repositories/learning_tree_repository.dart';
@@ -29,6 +30,18 @@ class LearningTreeRepositoryImpl implements LearningTreeRepository {
     try {
       final progress = await _dataSource.getUserProgress();
       return Right(progress);
+    } on DioException catch (e) {
+      return Left(_mapDioError(e));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CourseEntity>>> getCourses() async {
+    try {
+      final courses = await _dataSource.getCourses();
+      return Right(courses);
     } on DioException catch (e) {
       return Left(_mapDioError(e));
     } catch (_) {

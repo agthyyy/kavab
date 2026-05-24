@@ -15,6 +15,7 @@ import 'package:kavabanga/features/learning_tree/data/datasources/learning_tree_
 import 'package:kavabanga/features/learning_tree/data/repositories/learning_tree_repository_impl.dart';
 import 'package:kavabanga/features/learning_tree/domain/repositories/learning_tree_repository.dart';
 import 'package:kavabanga/features/learning_tree/domain/usecases/get_course_tree_usecase.dart';
+import 'package:kavabanga/features/learning_tree/domain/usecases/get_courses_usecase.dart';
 import 'package:kavabanga/features/learning_tree/domain/usecases/get_user_progress_usecase.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_bloc.dart';
 
@@ -36,8 +37,6 @@ import 'package:kavabanga/features/quiz/presentation/bloc/quiz_bloc.dart';
 
 // Gamification
 import 'package:kavabanga/features/gamification/data/datasources/gamification_remote_datasource.dart';
-import 'package:kavabanga/features/gamification/data/repositories/gamification_repository_impl.dart';
-import 'package:kavabanga/features/gamification/domain/repositories/gamification_repository.dart';
 import 'package:kavabanga/features/gamification/presentation/cubit/gamification_cubit.dart';
 
 // Notifications
@@ -85,11 +84,14 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<GetUserProgressUseCase>(
     () => GetUserProgressUseCase(sl<LearningTreeRepository>()),
   );
+  sl.registerLazySingleton<GetCoursesUseCase>(
+    () => GetCoursesUseCase(sl<LearningTreeRepository>()),
+  );
   sl.registerFactory<LearningTreeBloc>(
     () => LearningTreeBloc(
       getCourseTree: sl<GetCourseTreeUseCase>(),
       getUserProgress: sl<GetUserProgressUseCase>(),
-      remoteDataSource: sl<LearningTreeRemoteDataSource>(),
+      getCourses: sl<GetCoursesUseCase>(),
     ),
   );
 
@@ -137,11 +139,8 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<GamificationRemoteDataSource>(
     () => GamificationRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
   );
-  sl.registerLazySingleton<GamificationRepository>(
-    () => GamificationRepositoryImpl(sl<GamificationRemoteDataSource>()),
-  );
   sl.registerFactory<GamificationCubit>(
-    () => GamificationCubit(repository: sl<GamificationRepository>()),
+    () => GamificationCubit(dataSource: sl<GamificationRemoteDataSource>()),
   );
 
   // Notifications

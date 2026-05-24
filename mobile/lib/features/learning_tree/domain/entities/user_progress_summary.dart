@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 class UserProgressSummary extends Equatable {
   final int totalXp;
   final String? levelName;
+  final String? roleName;
   final int? xpToNextLevel;
   final int streak;
   final int completedLessons;
@@ -12,6 +13,7 @@ class UserProgressSummary extends Equatable {
   const UserProgressSummary({
     required this.totalXp,
     this.levelName,
+    this.roleName,
     this.xpToNextLevel,
     required this.streak,
     required this.completedLessons,
@@ -23,6 +25,7 @@ class UserProgressSummary extends Equatable {
   List<Object?> get props => [
         totalXp,
         levelName,
+        roleName,
         xpToNextLevel,
         streak,
         completedLessons,

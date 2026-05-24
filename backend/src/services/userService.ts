@@ -9,12 +9,12 @@ export interface CreateUserInput {
   login: string;
   password: string;
   fullName: string;
-  role: string;
+  roleId: string;
 }
 
 export interface UpdateUserInput {
   fullName?: string;
-  role?: string;
+  roleId?: string;
   isActive?: boolean;
   password?: string;
 }
@@ -24,6 +24,7 @@ export interface UserRecord {
   login: string;
   fullName: string;
   role: string;
+  roleId: string;
   isActive: boolean;
   createdAt: Date;
 }
@@ -34,14 +35,17 @@ function mapUser(row: Record<string, unknown>): UserRecord {
     login: row.login as string,
     fullName: row.full_name as string,
     role: row.role as string,
+    roleId: row.role_id as string,
     isActive: row.is_active as boolean,
     createdAt: row.created_at as Date,
   };
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserRecord> {
-  if (!VALID_ROLES.includes(input.role as UserRole)) {
-    const err = new Error(`Role must be one of: ${VALID_ROLES.join(', ')}`) as Error & { statusCode: number; code: string };
+  // Verify role exists
+  const role = await db('roles').where({ id: input.roleId }).first();
+  if (!role) {
+    const err = new Error('Invalid role ID') as Error & { statusCode: number; code: string };
     err.statusCode = 400;
     err.code = 'VALIDATION_ERROR';
     throw err;
@@ -62,20 +66,30 @@ export async function createUser(input: CreateUserInput): Promise<UserRecord> {
       login: input.login,
       password_hash: passwordHash,
       full_name: input.fullName,
-      role: input.role,
+      role_id: input.roleId,
       is_active: true,
     })
-    .returning(['id', 'login', 'full_name', 'role', 'is_active', 'created_at']);
+    .returning(['id', 'login', 'full_name', 'role_id', 'is_active', 'created_at']);
 
-  return mapUser(row);
+  // Join with roles to get role name
+  const userWithRole = await db('users')
+    .join('roles', 'users.role_id', 'roles.id')
+    .where('users.id', row.id)
+    .select('users.*', 'roles.name as role')
+    .first();
+
+  return mapUser(userWithRole);
 }
 
 export async function updateUser(id: string, input: UpdateUserInput): Promise<UserRecord> {
-  if (input.role !== undefined && !VALID_ROLES.includes(input.role as UserRole)) {
-    const err = new Error(`Role must be one of: ${VALID_ROLES.join(', ')}`) as Error & { statusCode: number; code: string };
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+  if (input.roleId !== undefined) {
+    const role = await db('roles').where({ id: input.roleId }).first();
+    if (!role) {
+      const err = new Error('Invalid role ID') as Error & { statusCode: number; code: string };
+      err.statusCode = 400;
+      err.code = 'VALIDATION_ERROR';
+      throw err;
+    }
   }
 
   const existing = await db('users').where({ id }).first();
@@ -88,16 +102,20 @@ export async function updateUser(id: string, input: UpdateUserInput): Promise<Us
 
   const updates: Record<string, unknown> = {};
   if (input.fullName !== undefined) updates.full_name = input.fullName;
-  if (input.role !== undefined) updates.role = input.role;
+  if (input.roleId !== undefined) updates.role_id = input.roleId;
   if (input.isActive !== undefined) updates.is_active = input.isActive;
   if (input.password !== undefined) updates.password_hash = await bcrypt.hash(input.password, 10);
 
-  const [row] = await db('users')
-    .where({ id })
-    .update(updates)
-    .returning(['id', 'login', 'full_name', 'role', 'is_active', 'created_at']);
+  await db('users').where({ id }).update(updates);
 
-  return mapUser(row);
+  // Join with roles to get role name
+  const userWithRole = await db('users')
+    .join('roles', 'users.role_id', 'roles.id')
+    .where('users.id', id)
+    .select('users.*', 'roles.name as role')
+    .first();
+
+  return mapUser(userWithRole);
 }
 
 export async function listUsers(page: number, limit: number): Promise<{ users: UserRecord[]; total: number; page: number; limit: number }> {
@@ -106,9 +124,11 @@ export async function listUsers(page: number, limit: number): Promise<{ users: U
   const [{ count }] = await db('users').count('id as count');
   const total = parseInt(count as string, 10);
 
+  // Join with roles to get role name
   const rows = await db('users')
-    .select('id', 'login', 'full_name', 'role', 'is_active', 'created_at')
-    .orderBy('created_at', 'desc')
+    .join('roles', 'users.role_id', 'roles.id')
+    .select('users.id', 'users.login', 'users.full_name', 'users.role_id', 'users.is_active', 'users.created_at', 'roles.name as role')
+    .orderBy('users.created_at', 'desc')
     .limit(limit)
     .offset(offset);
 

@@ -6,6 +6,7 @@ export async function completeLessonHandler(req: Request, res: Response, next: N
     const userId = req.user!.id;
     const lessonId = req.params.id;
     const result = await progressService.completeLesson(userId, lessonId);
+    console.log('[completeLesson] Returning:', result);
     res.status(200).json(result);
   } catch (err) {
     next(err);
@@ -14,18 +15,29 @@ export async function completeLessonHandler(req: Request, res: Response, next: N
 
 export async function submitQuizHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    console.log('[submitQuizHandler] Request received');
+    console.log('[submitQuizHandler] User ID:', req.user!.id);
+    console.log('[submitQuizHandler] Quiz ID:', req.params.id);
+    console.log('[submitQuizHandler] Request body:', JSON.stringify(req.body, null, 2));
+    
     const userId = req.user!.id;
     const quizId = req.params.id;
     const { answers } = req.body as { answers: progressService.QuizAnswerInput[] };
 
+    console.log('[submitQuizHandler] Extracted answers:', answers);
+
     if (!Array.isArray(answers)) {
+      console.log('[submitQuizHandler] Validation error: answers is not an array');
       res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'answers must be an array' } });
       return;
     }
 
+    console.log('[submitQuizHandler] Calling progressService.submitQuiz...');
     const result = await progressService.submitQuiz(userId, quizId, answers);
+    console.log('[submitQuizHandler] Success:', result);
     res.status(200).json(result);
   } catch (err) {
+    console.log('[submitQuizHandler] Error:', err);
     next(err);
   }
 }

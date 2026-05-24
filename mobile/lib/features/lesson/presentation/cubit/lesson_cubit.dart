@@ -29,7 +29,19 @@ class LessonCubit extends Cubit<LessonState> {
     final result = await completeLesson(lessonId);
     result.fold(
       (failure) => emit(LessonError(failure.message)),
-      (xp) => emit(LessonCompleted(current.lesson, xpEarned: xp)),
+      (completeResult) {
+        // Update lesson with quiz and next lesson info
+        final updatedLesson = LessonEntity(
+          id: current.lesson.id,
+          title: current.lesson.title,
+          description: current.lesson.description,
+          xpReward: current.lesson.xpReward,
+          blocks: current.lesson.blocks,
+          quizId: completeResult.quizId,
+          nextLessonId: completeResult.nextLessonId,
+        );
+        emit(LessonCompleted(updatedLesson, xpEarned: completeResult.xpEarned));
+      },
     );
   }
 }

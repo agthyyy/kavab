@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:kavabanga/features/learning_tree/domain/entities/module_node.dart';
+import 'package:kavabanga/features/learning_tree/domain/entities/course_entity.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_bloc.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_event.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_state.dart';
-import 'package:kavabanga/features/learning_tree/presentation/widgets/module_card.dart';
+import 'package:kavabanga/features/learning_tree/presentation/widgets/course_card.dart';
 import 'package:kavabanga/features/learning_tree/presentation/widgets/progress_header.dart';
 import 'package:kavabanga/injection_container.dart';
 
@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LearningTreeBloc>(
-      create: (_) => sl<LearningTreeBloc>()..add(const LoadLearningTree('')),
+      create: (_) => sl<LearningTreeBloc>()..add(const LoadCourses()),
       child: const _HomeView(),
     );
   }
@@ -91,7 +91,7 @@ class _HomeViewState extends State<_HomeView> {
                   ElevatedButton.icon(
                     onPressed: () => context
                         .read<LearningTreeBloc>()
-                        .add(const LoadLearningTree('')),
+                        .add(const LoadCourses()),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
                     style: ElevatedButton.styleFrom(
@@ -122,7 +122,7 @@ class _HomeViewState extends State<_HomeView> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'No courses yet',
+                    'Нет курсов',
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -130,7 +130,7 @@ class _HomeViewState extends State<_HomeView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Ask your manager to assign a course',
+                    'Попросите менеджера назначить курс',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ],
@@ -138,42 +138,43 @@ class _HomeViewState extends State<_HomeView> {
             );
           }
 
-          if (state is LearningTreeLoaded) {
+          if (state is CoursesLoaded) {
             return RefreshIndicator(
               color: const Color(0xFFC8860A),
               onRefresh: () async {
                 context
                     .read<LearningTreeBloc>()
-                    .add(const RefreshLearningTree(''));
+                    .add(const LoadCourses());
                 await Future.delayed(const Duration(milliseconds: 500));
               },
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: ProgressHeader(progress: state.progress),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final module = state.modules[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: ModuleCard(
-                              module: module,
-                              index: index,
-                              onTap: () => _onModuleTap(context, module),
-                            ),
-                          );
-                        },
-                        childCount: state.modules.length,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    ProgressHeader(progress: state.progress),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Мои курсы',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2C1810),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                ],
+                    const SizedBox(height: 12),
+                    ...state.courses.map((course) => CourseCard(
+                          course: course,
+                          onTap: () => _onCourseTap(context, course),
+                        )),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             );
           }
@@ -187,42 +188,11 @@ class _HomeViewState extends State<_HomeView> {
   void _goToProfile() async {
     await Navigator.of(context).pushNamed('/profile');
     if (mounted) {
-      context.read<LearningTreeBloc>().add(const RefreshLearningTree(''));
+      context.read<LearningTreeBloc>().add(const LoadCourses());
     }
   }
 
-  void _onModuleTap(BuildContext context, ModuleNode module) {
-    switch (module.status) {
-      case ModuleStatus.available:
-      case ModuleStatus.completed:
-        if (module.firstLessonId != null) {
-          Navigator.of(context).pushNamed('/lesson', arguments: module.firstLessonId);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('No lessons in this module yet'),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-          );
-        }
-        break;
-      case ModuleStatus.locked:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.lock, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text('Complete previous module first'),
-              ],
-            ),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: const Color(0xFF2C1810),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-        break;
-    }
+  void _onCourseTap(BuildContext context, CourseEntity course) {
+    Navigator.of(context).pushNamed('/course', arguments: course.id);
   }
 }

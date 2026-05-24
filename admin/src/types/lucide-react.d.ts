@@ -20,4 +20,9 @@ declare module 'lucide-react' {
   export const Send: LucideIcon
   export const ChevronDown: LucideIcon
   export const ChevronRight: LucideIcon
+  export const Edit: LucideIcon
+  export const Trash: LucideIcon
+  export const Check: LucideIcon
+  export const X: LucideIcon
+  export const Award: LucideIcon
 }

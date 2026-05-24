@@ -39,6 +39,7 @@ export interface QuizRecord {
   id: string;
   moduleId: string | null;
   lessonId: string | null;
+  title: string;
   xpMax: number;
   passThreshold: number;
 }
@@ -48,6 +49,7 @@ export interface QuestionRecord {
   quizId: string;
   questionType: 'single' | 'multiple' | 'matching' | 'true_false';
   text: string;
+  imageUrl: string | null;
   explanation: string | null;
   orderIndex: number;
   options: AnswerOptionRecord[];
@@ -263,6 +265,7 @@ function mapQuiz(row: Record<string, unknown>): QuizRecord {
     id: row.id as string,
     moduleId: (row.module_id as string | null) ?? null,
     lessonId: (row.lesson_id as string | null) ?? null,
+    title: (row.title as string | null) ?? 'Тест', // Default title since DB doesn't have this field
     xpMax: row.xp_max as number,
     passThreshold: row.pass_threshold as number,
   };
@@ -276,6 +279,7 @@ export type QuestionType = typeof VALID_QUESTION_TYPES[number];
 export async function addQuestion(quizId: string, data: {
   questionType: string;
   text: string;
+  imageUrl?: string;
   explanation?: string;
   orderIndex: number;
   options: Array<{ text: string; isCorrect: boolean; matchPair?: string }>;
@@ -289,10 +293,11 @@ export async function addQuestion(quizId: string, data: {
       quiz_id: quizId,
       question_type: data.questionType,
       text: data.text,
+      image_url: data.imageUrl ?? null,
       explanation: data.explanation ?? null,
       order_index: data.orderIndex,
     })
-    .returning(['id', 'quiz_id', 'question_type', 'text', 'explanation', 'order_index']);
+    .returning(['id', 'quiz_id', 'question_type', 'text', 'image_url', 'explanation', 'order_index']);
 
   const optionRows = await db('answer_options')
     .insert(
@@ -310,6 +315,7 @@ export async function addQuestion(quizId: string, data: {
     quizId: qRow.quiz_id as string,
     questionType: qRow.question_type as QuestionType,
     text: qRow.text as string,
+    imageUrl: qRow.image_url as string | null,
     explanation: qRow.explanation as string | null,
     orderIndex: qRow.order_index as number,
     options: optionRows.map((o: Record<string, unknown>) => ({
@@ -333,7 +339,7 @@ export async function generateUploadUrl(data: {
   fileName: string;
   contentType: string;
   fileSize: number;
-}): Promise<{ uploadUrl: string; filePath: string }> {
+}): Promise<{ uploadUrl: string; filePath: string; publicUrl: string }> {
   const isImage = IMAGE_TYPES.includes(data.contentType);
   const isVideo = VIDEO_TYPES.includes(data.contentType);
 
@@ -353,33 +359,42 @@ export async function generateUploadUrl(data: {
     throw makeError('Video files must be <= 500MB', 400, 'VALIDATION_ERROR');
   }
 
-  // Import lazily to avoid Firebase init issues in tests
-  const { getStorage } = await import('../config/firebase');
-  const storage = getStorage();
-  const bucket = storage.bucket();
-
-  const ext = data.fileName.split('.').pop() ?? '';
-  const filePath = `uploads/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-  const file = bucket.file(filePath);
-
-  const [uploadUrl] = await file.getSignedUrl({
-    action: 'write',
-    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-    contentType: data.contentType,
-  });
-
-  return { uploadUrl, filePath };
+  // Генерируем уникальное имя файла
+  const timestamp = Date.now();
+  const extension = data.fileName.split('.').pop();
+  const uniqueFileName = `${timestamp}-${Math.random().toString(36).substring(2)}.${extension}`;
+  const filePath = `uploads/${uniqueFileName}`;
+  
+  // URL для загрузки (будет обрабатываться через multer)
+  const uploadUrl = `/api/admin/media/upload`;
+  
+  // Публичный URL для доступа к файлу
+  const publicUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${uniqueFileName}`;
+  
+  return { 
+    uploadUrl, 
+    filePath, 
+    publicUrl 
+  };
 }
 
 // ── Content read endpoints ────────────────────────────────────────────────────
 
 export async function getCoursesForUser(userId: string): Promise<CourseRecord[]> {
-  const rows = await db('courses')
-    .join('user_courses', 'courses.id', 'user_courses.course_id')
-    .where('user_courses.user_id', userId)
-    .select('courses.id', 'courses.title', 'courses.description', 'courses.is_published', 'courses.created_at');
-
-  return rows.map((r: Record<string, unknown>) => mapCourse(r));
+  const user = await db('users').where({ id: userId }).select('role_id').first();
+  if (!user) throw makeError('User not found', 404, 'NOT_FOUND');
+  
+  const allCourses = await db('courses').where({ is_published: true }).select('id', 'title', 'description', 'is_published', 'created_at');
+  const result: CourseRecord[] = [];
+  
+  for (const course of allCourses) {
+    const courseRoles = await db('course_roles').where({ course_id: course.id }).select('role_id');
+    if (courseRoles.length === 0 || courseRoles.some(cr => cr.role_id === user.role_id)) {
+      result.push(mapCourse(course));
+    }
+  }
+  
+  return result;
 }
 
 export async function getAllCourses(): Promise<Record<string, unknown>[]> {
@@ -396,10 +411,30 @@ export async function getLessonsByModule(moduleId: string): Promise<Record<strin
 }
 
 export async function getCourseTree(courseId: string, userId: string): Promise<ModuleWithStatus[]> {
+  // Получаем роль пользователя
+  const user = await db('users')
+    .where({ id: userId })
+    .select('role_id')
+    .first();
+
+  if (!user) {
+    throw makeError('User not found', 404, 'NOT_FOUND');
+  }
+
+  // Получаем модули, доступные для роли пользователя
   const modules = await db('modules')
-    .where({ course_id: courseId })
-    .orderBy('order_index', 'asc')
-    .select('id', 'course_id', 'title', 'order_index', 'pass_threshold');
+    .where('modules.course_id', courseId)
+    .leftJoin('module_roles', 'modules.id', 'module_roles.module_id')
+    .where(function() {
+      // Модуль доступен если:
+      // 1. У него нет привязки к ролям (доступен всем)
+      // 2. Или он привязан к роли пользователя
+      this.whereNull('module_roles.role_id')
+        .orWhere('module_roles.role_id', user.role_id);
+    })
+    .distinct('modules.id', 'modules.course_id', 'modules.title', 'modules.order_index', 'modules.pass_threshold')
+    .orderBy('modules.order_index', 'asc')
+    .select('modules.id', 'modules.course_id', 'modules.title', 'modules.order_index', 'modules.pass_threshold');
 
   if (modules.length === 0) return [];
 
@@ -442,7 +477,29 @@ export async function getCourseTree(courseId: string, userId: string): Promise<M
   for (const mod of modules) {
     const moduleId = mod.id as string;
     const quizId = quizByModule.get(moduleId);
-    const isCompleted = quizId ? passedQuizIds.has(quizId) : false;
+    
+    let isCompleted = false;
+    
+    if (quizId) {
+      // Если у модуля есть тест - проверяем, пройден ли он
+      isCompleted = passedQuizIds.has(quizId);
+    } else {
+      // Если у модуля НЕТ теста - проверяем, пройдены ли ВСЕ уроки
+      const lessonsInModule = await db('lessons')
+        .where({ module_id: moduleId })
+        .select('id');
+      
+      if (lessonsInModule.length > 0) {
+        const lessonIds = lessonsInModule.map(l => l.id as string);
+        const completedLessons = await db('user_lesson_progress')
+          .whereIn('lesson_id', lessonIds)
+          .where({ user_id: userId })
+          .select('lesson_id');
+        
+        // Модуль считается завершенным только если пройдены ВСЕ уроки
+        isCompleted = completedLessons.length === lessonsInModule.length;
+      }
+    }
 
     let status: ModuleStatus;
     if (isCompleted) {
@@ -469,7 +526,7 @@ export async function getCourseTree(courseId: string, userId: string): Promise<M
   return result;
 }
 
-export async function getLessonWithBlocks(lessonId: string): Promise<{ lesson: LessonRecord & { nextLessonId: string | null }; blocks: LessonBlockRecord[] }> {
+export async function getLessonWithBlocks(lessonId: string): Promise<{ lesson: LessonRecord & { nextLessonId: string | null; quizId: string | null }; blocks: LessonBlockRecord[] }> {
   const lesson = await db('lessons').where({ id: lessonId }).first();
   if (!lesson) throw makeError('Lesson not found', 404, 'NOT_FOUND');
 
@@ -481,33 +538,60 @@ export async function getLessonWithBlocks(lessonId: string): Promise<{ lesson: L
     .select('id')
     .first();
 
+  // Find quiz for this lesson
+  const quiz = await db('quizzes')
+    .where({ lesson_id: lessonId })
+    .select('id')
+    .first();
+
+  // Check if quiz has questions
+  let quizId: string | null = null;
+  if (quiz) {
+    const questionCount = await db('questions')
+      .where({ quiz_id: quiz.id })
+      .count('id as count')
+      .first();
+    
+    const count = parseInt(String(questionCount?.count ?? '0'), 10);
+    if (count > 0) {
+      quizId = quiz.id as string;
+    }
+  }
+
   const blocks = await db('lesson_blocks')
     .where({ lesson_id: lessonId })
     .orderBy('order_index', 'asc')
     .select('id', 'lesson_id', 'block_type', 'content', 'order_index');
 
   return {
-    lesson: { ...mapLesson(lesson), nextLessonId: nextLesson ? (nextLesson.id as string) : null },
+    lesson: { 
+      ...mapLesson(lesson), 
+      nextLessonId: nextLesson ? (nextLesson.id as string) : null,
+      quizId,
+    },
     blocks: blocks.map((b: Record<string, unknown>) => mapBlock(b)),
   };
 }
 
-export async function getQuizWithQuestions(quizId: string): Promise<{ quiz: QuizRecord; questions: QuestionRecord[] }> {
+export async function getQuizWithQuestions(quizId: string, includeCorrectAnswers: boolean = false): Promise<{ quiz: QuizRecord; questions: QuestionRecord[] }> {
   const quiz = await db('quizzes').where({ id: quizId }).first();
   if (!quiz) throw makeError('Quiz not found', 404, 'NOT_FOUND');
 
   const questions = await db('questions')
     .where({ quiz_id: quizId })
     .orderBy('order_index', 'asc')
-    .select('id', 'quiz_id', 'question_type', 'text', 'explanation', 'order_index');
+    .select('id', 'quiz_id', 'question_type', 'text', 'image_url', 'explanation', 'order_index');
 
   const questionIds = questions.map((q: Record<string, unknown>) => q.id as string);
+
+  const selectFields = includeCorrectAnswers
+    ? ['id', 'question_id', 'text', 'is_correct', 'match_pair']
+    : ['id', 'question_id', 'text', 'match_pair'];
 
   const options = questionIds.length > 0
     ? await db('answer_options')
         .whereIn('question_id', questionIds)
-        .select('id', 'question_id', 'text', 'match_pair')
-        // NOTE: is_correct is intentionally excluded from content read endpoint
+        .select(selectFields)
     : [];
 
   const optionsByQuestion = new Map<string, AnswerOptionRecord[]>();
@@ -518,6 +602,7 @@ export async function getQuizWithQuestions(quizId: string): Promise<{ quiz: Quiz
       id: opt.id as string,
       questionId: opt.question_id as string,
       text: opt.text as string,
+      isCorrect: includeCorrectAnswers ? (opt.is_correct as boolean) : undefined,
       matchPair: opt.match_pair as string | null,
     });
   }
@@ -529,6 +614,7 @@ export async function getQuizWithQuestions(quizId: string): Promise<{ quiz: Quiz
       quizId: q.quiz_id as string,
       questionType: q.question_type as QuestionType,
       text: q.text as string,
+      imageUrl: q.image_url as string | null,
       explanation: q.explanation as string | null,
       orderIndex: q.order_index as number,
       options: optionsByQuestion.get(q.id as string) ?? [],

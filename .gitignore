@@ -1,5 +1,53 @@
+# Dependencies
 node_modules/
+package-lock.json
+
+# Build outputs
 build/
+dist/
 .dart_tool/
 *.cache
 *.dill
+
+# Next.js
+admin/.next/
+admin/out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+backend/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+temp_input.txt
+flutter_reload*.txt
+fix_*.py
+fix_*.txt
+test-*.js
+check-users.js
+create-test-user.js
+reset-password.js
+create-test-user-db.js

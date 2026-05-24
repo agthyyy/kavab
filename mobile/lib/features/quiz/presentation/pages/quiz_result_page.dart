@@ -94,7 +94,7 @@ class _QuizResultPageState extends State<QuizResultPage>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    passed ? 'Passed!' : 'Try Again',
+                    passed ? 'Пройден!' : 'Попробуйте снова',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -116,9 +116,16 @@ class _QuizResultPageState extends State<QuizResultPage>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pass threshold: ${widget.quiz.passThreshold}%',
+                    'Порог прохождения: ${widget.quiz.passThreshold}%',
                     style: const TextStyle(color: Colors.white60, fontSize: 13),
                   ),
+                  if (widget.result.attemptNumber > 1) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Попытка ${widget.result.attemptNumber}',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   // Progress bar
                   ClipRRect(
@@ -186,35 +193,30 @@ class _QuizResultPageState extends State<QuizResultPage>
                   ],
                 ),
               ),
-            // Wrong answers
-            if (widget.result.wrongAnswers.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE53935),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Review mistakes',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A1A1A),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ...widget.result.wrongAnswers
-                  .map((w) => _WrongAnswerCard(wrong: w)),
-            ],
+            // Wrong answers section removed - no longer showing correct answers
             const SizedBox(height: 24),
+            // Retry button if failed
+            if (!passed)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text(
+                    'Попробовать снова',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFC8860A),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            if (!passed) const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -222,7 +224,7 @@ class _QuizResultPageState extends State<QuizResultPage>
                     Navigator.of(context).popUntil((r) => r.isFirst),
                 icon: const Icon(Icons.home_rounded),
                 label: const Text(
-                  'Back to Home',
+                  'На главную',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -238,98 +240,6 @@ class _QuizResultPageState extends State<QuizResultPage>
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _WrongAnswerCard extends StatelessWidget {
-  final WrongAnswer wrong;
-  const _WrongAnswerCard({required this.wrong});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFFFCDD2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFEBEE),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(Icons.close_rounded,
-                    color: Color(0xFFE53935), size: 16),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  wrong.questionText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF1A1A1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.check_rounded,
-                    color: Color(0xFF4CAF50), size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    wrong.correctAnswer,
-                    style: const TextStyle(
-                      color: Color(0xFF2E7D32),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (wrong.explanation != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              wrong.explanation!,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }

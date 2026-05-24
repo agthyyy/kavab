@@ -6,9 +6,10 @@ import { Users, BookOpen, Trophy, LogOut } from 'lucide-react'
 import clsx from 'clsx'
 
 const nav = [
-  { href: '/dashboard/users', label: 'Employees', icon: Users },
-  { href: '/dashboard/courses', label: 'Courses', icon: BookOpen },
-  { href: '/dashboard/achievements', label: 'Achievements', icon: Trophy },
+  { href: '/dashboard/users', label: 'Сотрудники', icon: Users },
+  { href: '/dashboard/courses', label: 'Курсы', icon: BookOpen },
+  { href: '/dashboard/achievements', label: 'Достижения', icon: Trophy },
+  { href: '/dashboard/roles', label: 'Должности', icon: Users },
 ]
 
 export function Sidebar() {

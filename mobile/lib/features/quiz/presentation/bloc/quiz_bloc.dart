@@ -16,18 +16,28 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     on<LoadQuiz>(_onLoad);
     on<AnswerQuestion>(_onAnswer);
     on<SubmitQuiz>(_onSubmit);
+    on<NavigateToQuestion>(_onNavigate);
   }
 
   Future<void> _onLoad(LoadQuiz event, Emitter<QuizState> emit) async {
+    print('[QuizBloc] _onLoad called with quizId: ${event.quizId}');
     emit(QuizLoading());
+    print('[QuizBloc] Emitted QuizLoading, calling getQuiz...');
     final result = await getQuiz(event.quizId);
+    print('[QuizBloc] getQuiz result: ${result.isRight() ? "success" : "failure"}');
     result.fold(
-      (f) => emit(QuizError(f.message)),
-      (quiz) => emit(QuizInProgress(
-        quiz: quiz,
-        currentIndex: 0,
-        answers: const {},
-      )),
+      (f) {
+        print('[QuizBloc] Error loading quiz: ${f.message}');
+        emit(QuizError(f.message));
+      },
+      (quiz) {
+        print('[QuizBloc] Quiz loaded successfully with ${quiz.questions.length} questions');
+        emit(QuizInProgress(
+          quiz: quiz,
+          currentIndex: 0,
+          answers: const {},
+        ));
+      },
     );
   }
 
@@ -48,5 +58,11 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       (f) => emit(QuizError(f.message)),
       (quizResult) => emit(QuizResultState(quiz: s.quiz, result: quizResult)),
     );
+  }
+
+  void _onNavigate(NavigateToQuestion event, Emitter<QuizState> emit) {
+    final s = state;
+    if (s is! QuizInProgress) return;
+    emit(s.copyWith(currentIndex: event.index));
   }
 }

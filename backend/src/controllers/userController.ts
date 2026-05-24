@@ -3,22 +3,24 @@ import * as userService from '../services/userService';
 
 export async function createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { login, password, fullName, full_name, role } = req.body as {
+    const { login, password, fullName, full_name, roleId, role_id } = req.body as {
       login?: string;
       password?: string;
       fullName?: string;
       full_name?: string;
-      role?: string;
+      roleId?: string;
+      role_id?: string;
     };
 
     const resolvedFullName = fullName ?? full_name;
+    const resolvedRoleId = roleId ?? role_id;
 
-    if (!login || !password || !resolvedFullName || !role) {
-      res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'login, password, full_name, role are required' } });
+    if (!login || !password || !resolvedFullName || !resolvedRoleId) {
+      res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'login, password, full_name, role_id are required' } });
       return;
     }
 
-    const user = await userService.createUser({ login, password, fullName: resolvedFullName, role });
+    const user = await userService.createUser({ login, password, fullName: resolvedFullName, roleId: resolvedRoleId });
     res.status(201).json({ user });
   } catch (err) {
     next(err);
@@ -28,14 +30,17 @@ export async function createUser(req: Request, res: Response, next: NextFunction
 export async function updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
-    const { fullName, role, isActive, password } = req.body as {
+    const { fullName, roleId, role_id, isActive, password } = req.body as {
       fullName?: string;
-      role?: string;
+      roleId?: string;
+      role_id?: string;
       isActive?: boolean;
       password?: string;
     };
 
-    const user = await userService.updateUser(id, { fullName, role, isActive, password });
+    const resolvedRoleId = roleId ?? role_id;
+
+    const user = await userService.updateUser(id, { fullName, roleId: resolvedRoleId, isActive, password });
     res.status(200).json({ user });
   } catch (err) {
     next(err);

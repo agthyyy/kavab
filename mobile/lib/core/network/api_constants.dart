@@ -13,4 +13,6 @@ class ApiConstants {
   static const String achievements = '/progress/me/achievements';
   static const String xpHistory = '/progress/me/xp-history';
   static const String fcmToken = '/notifications/token';
+  static const String rankingMe = '/ranking/me';
+  static const String rankingLeaderboard = '/ranking/leaderboard';
 }

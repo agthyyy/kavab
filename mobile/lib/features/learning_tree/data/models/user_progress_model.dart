@@ -4,6 +4,7 @@ class UserProgressModel extends UserProgressSummary {
   const UserProgressModel({
     required super.totalXp,
     super.levelName,
+    super.roleName,
     super.xpToNextLevel,
     required super.streak,
     required super.completedLessons,
@@ -15,6 +16,7 @@ class UserProgressModel extends UserProgressSummary {
     return UserProgressModel(
       totalXp: (json['totalXp'] as num?)?.toInt() ?? 0,
       levelName: json['levelName'] as String?,
+      roleName: json['roleName'] as String?,
       xpToNextLevel: (json['xpToNextLevel'] as num?)?.toInt(),
       streak: (json['streak'] as num?)?.toInt() ?? 0,
       completedLessons: (json['completedLessons'] as num?)?.toInt() ?? 0,

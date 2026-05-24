@@ -24,3 +24,10 @@ class AnswerQuestion extends QuizEvent {
 class SubmitQuiz extends QuizEvent {
   const SubmitQuiz();
 }
+
+class NavigateToQuestion extends QuizEvent {
+  final int index;
+  const NavigateToQuestion(this.index);
+  @override
+  List<Object?> get props => [index];
+}

@@ -50,7 +50,10 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     emit(const AuthLoading());
-    await _logoutUseCase();
-    emit(const AuthUnauthenticated());
+    final result = await _logoutUseCase();
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(const AuthUnauthenticated()),
+    );
   }
 }

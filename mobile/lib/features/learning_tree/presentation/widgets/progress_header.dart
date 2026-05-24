@@ -9,7 +9,8 @@ class ProgressHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final xpToNext = progress.xpToNextLevel;
-    final levelName = progress.levelName ?? 'Beginner';
+    final roleName = progress.roleName ?? 'Сотрудник';
+    final levelName = progress.levelName ?? 'Новичок';
 
     double xpRatio = 0.0;
     if (xpToNext != null && xpToNext > 0) {
@@ -51,10 +52,10 @@ class ProgressHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.star_rounded, color: Colors.white, size: 14),
+                    const Icon(Icons.work_outline, color: Colors.white, size: 14),
                     const SizedBox(width: 4),
                     Text(
-                      levelName,
+                      roleName,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -95,7 +96,7 @@ class ProgressHeader extends StatelessWidget {
               const Spacer(),
               if (xpToNext != null && xpToNext > 0)
                 Text(
-                  '$xpToNext XP to next level',
+                  '$xpToNext опыта до следующего уровня',
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,

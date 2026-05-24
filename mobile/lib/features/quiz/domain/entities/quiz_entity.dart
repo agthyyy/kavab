@@ -33,6 +33,7 @@ class MatchingPair extends Equatable {
 class QuestionEntity extends Equatable {
   final String id;
   final String text;
+  final String? imageUrl;
   final QuestionType type;
   final List<AnswerOption> options;
   final List<MatchingPair> matchingPairs;
@@ -41,6 +42,7 @@ class QuestionEntity extends Equatable {
   const QuestionEntity({
     required this.id,
     required this.text,
+    this.imageUrl,
     required this.type,
     required this.options,
     this.matchingPairs = const [],
@@ -48,7 +50,7 @@ class QuestionEntity extends Equatable {
   });
 
   @override
-  List<Object> get props => [id, text, type, options, matchingPairs, orderIndex];
+  List<Object?> get props => [id, text, imageUrl, type, options, matchingPairs, orderIndex];
 }
 
 class QuizEntity extends Equatable {
@@ -74,30 +76,15 @@ class QuizResult extends Equatable {
   final int score;
   final bool passed;
   final int xpEarned;
-  final List<WrongAnswer> wrongAnswers;
+  final int attemptNumber;
 
   const QuizResult({
     required this.score,
     required this.passed,
     required this.xpEarned,
-    required this.wrongAnswers,
+    required this.attemptNumber,
   });
 
   @override
-  List<Object> get props => [score, passed, xpEarned, wrongAnswers];
-}
-
-class WrongAnswer extends Equatable {
-  final String questionText;
-  final String correctAnswer;
-  final String? explanation;
-
-  const WrongAnswer({
-    required this.questionText,
-    required this.correctAnswer,
-    this.explanation,
-  });
-
-  @override
-  List<Object?> get props => [questionText, correctAnswer, explanation];
+  List<Object> get props => [score, passed, xpEarned, attemptNumber];
 }

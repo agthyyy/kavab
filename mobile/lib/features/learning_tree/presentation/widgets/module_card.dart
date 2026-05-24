@@ -26,7 +26,7 @@ class ModuleCard extends StatelessWidget {
           iconBg: const Color(0xFF4CAF50),
           icon: Icons.check_rounded,
           iconColor: Colors.white,
-          statusText: 'Completed',
+          statusText: 'Завершено',
           statusColor: const Color(0xFF4CAF50),
           opacity: 1.0,
         );
@@ -40,7 +40,7 @@ class ModuleCard extends StatelessWidget {
           iconBg: const Color(0xFFC8860A),
           icon: Icons.play_arrow_rounded,
           iconColor: Colors.white,
-          statusText: 'Available',
+          statusText: 'Доступно',
           statusColor: const Color(0xFFC8860A),
           opacity: 1.0,
           highlighted: true,
@@ -55,7 +55,7 @@ class ModuleCard extends StatelessWidget {
           iconBg: Colors.grey.shade300,
           icon: Icons.lock_outline_rounded,
           iconColor: Colors.grey.shade500,
-          statusText: 'Locked',
+          statusText: 'Заблокировано',
           statusColor: Colors.grey,
           opacity: 0.7,
         );
@@ -140,7 +140,7 @@ class _ModuleTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Module ${index + 1}',
+                        'Модуль ${index + 1}',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey[500],

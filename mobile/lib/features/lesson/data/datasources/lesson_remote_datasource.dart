@@ -5,7 +5,7 @@ import 'package:kavabanga/features/lesson/domain/entities/lesson_entity.dart';
 
 abstract class LessonRemoteDataSource {
   Future<LessonEntity> getLesson(String lessonId);
-  Future<int> completeLesson(String lessonId);
+  Future<LessonCompleteResult> completeLesson(String lessonId);
 }
 
 class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
@@ -20,10 +20,15 @@ class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
   }
 
   @override
-  Future<int> completeLesson(String lessonId) async {
+  Future<LessonCompleteResult> completeLesson(String lessonId) async {
     final url = ApiConstants.completeLesson.replaceFirst('{id}', lessonId);
     final response = await apiClient.post(url, data: {});
     final data = response.data as Map<String, dynamic>?;
-    return (data?['xpEarned'] as num?)?.toInt() ?? 10;
+    
+    return LessonCompleteResult(
+      xpEarned: (data?['xpAwarded'] as num?)?.toInt() ?? 0,
+      quizId: data?['quizId'] as String?,
+      nextLessonId: data?['nextLessonId'] as String?,
+    );
   }
 }

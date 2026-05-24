@@ -59,7 +59,12 @@ export async function login(loginInput: string, password: string): Promise<Login
     throw err;
   }
 
-  const user = await db('users').where({ login: loginInput }).first();
+  // Join with roles table to get role name
+  const user = await db('users')
+    .join('roles', 'users.role_id', 'roles.id')
+    .where('users.login', loginInput)
+    .select('users.*', 'roles.name as role')
+    .first();
 
   if (!user || !user.is_active) {
     recordFailedAttempt(loginInput);
@@ -111,7 +116,13 @@ export async function refresh(refreshToken: string): Promise<{ accessToken: stri
     throw err;
   }
 
-  const user = await db('users').where({ id: record.user_id }).first();
+  // Join with roles table to get role name
+  const user = await db('users')
+    .join('roles', 'users.role_id', 'roles.id')
+    .where('users.id', record.user_id)
+    .select('users.id', 'users.is_active', 'roles.name as role')
+    .first();
+
   if (!user || !user.is_active) {
     const err = new Error('Account is disabled') as Error & { statusCode: number; code: string };
     err.statusCode = 403;
