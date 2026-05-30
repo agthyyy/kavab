@@ -12,6 +12,8 @@ router.post('/users', requireAuth, requireRole('admin'), userController.createUs
 router.patch('/users/:id', requireAuth, requireRole('admin'), userController.updateUser);
 router.get('/users', requireAuth, requireRole('admin'), userController.listUsers);
 router.post('/users/:id/courses', requireAuth, requireRole('admin'), userController.assignCourse);
+router.delete('/users/:id', requireAuth, requireRole('admin'), userController.deleteUser);
+
 
 // ── Course management ─────────────────────────────────────────────────────────
 router.get('/courses', requireAuth, requireRole('admin'), contentController.listCourses);

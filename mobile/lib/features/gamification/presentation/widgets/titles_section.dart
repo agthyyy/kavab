@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TitlesSection extends StatelessWidget {
   final List<dynamic> titles;
@@ -15,15 +16,16 @@ class TitlesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.black.withOpacity(0.04), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -35,82 +37,82 @@ class TitlesSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF6366F1).withOpacity(0.08),
+                  shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.military_tech_outlined,
-                  color: Color(0xFF8B5CF6),
-                  size: 20,
+                  Icons.military_tech_rounded,
+                  color: Color(0xFF6366F1),
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Титулы',
-                style: TextStyle(
+              Text(
+                'Ваши титулы',
+                style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C1810),
+                  color: const Color(0xFF2C1810),
                 ),
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF6366F1).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Text(
                   'Открыто: $unlockedCount',
-                  style: const TextStyle(
+                  style: GoogleFonts.outfit(
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF8B5CF6),
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF6366F1),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           if (activeTitle != null)
             _buildActiveTitleCard(activeTitle)
           else
             _buildNoActiveTitleCard(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           if (unlockedCount > 0)
             GestureDetector(
               onTap: () => _showTitlesDialog(context),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F0EB),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFFAF6F2),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF8B5CF6).withOpacity(0.2),
+                    color: const Color(0xFF6366F1).withOpacity(0.12),
                     width: 1,
                   ),
                 ),
                 child: Row(
                   children: [
                     const Icon(
-                      Icons.collections_bookmark_outlined,
-                      color: Color(0xFF8B5CF6),
+                      Icons.collections_bookmark_rounded,
+                      color: Color(0xFF6366F1),
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
+                    Text(
                       'Посмотреть все титулы',
-                      style: TextStyle(
+                      style: GoogleFonts.outfit(
                         fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF8B5CF6),
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF6366F1),
                       ),
                     ),
                     const Spacer(),
                     const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Color(0xFF8B5CF6),
-                      size: 16,
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFF6366F1),
+                      size: 14,
                     ),
                   ],
                 ),
@@ -122,42 +124,35 @@ class TitlesSection extends StatelessWidget {
   }
 
   Widget _buildActiveTitleCard(dynamic title) {
-    final colorHex = title['colorHex'] ?? '#8B5CF6';
+    final colorHex = title['colorHex'] ?? '#6366F1';
     final color = _hexToColor(colorHex);
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.1),
-            color.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
+          color: color.withOpacity(0.2),
+          width: 1.5,
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
+              color: color.withOpacity(0.08),
+              shape: BoxShape.circle,
             ),
             child: Icon(
               _getTitleIcon(title['icon']),
               color: color,
-              size: 20,
+              size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,24 +161,24 @@ class TitlesSection extends StatelessWidget {
                   children: [
                     Text(
                       title['name'] ?? 'Титул',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: color,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: _getRarityColor(title['rarity']).withOpacity(0.2),
+                        color: _getRarityColor(title['rarity']).withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         _getRarityText(title['rarity']),
                         style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
                           color: _getRarityColor(title['rarity']),
                         ),
                       ),
@@ -193,25 +188,33 @@ class TitlesSection extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   title['description'] ?? '',
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: const Color(0xFF7A6A5C),
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: const Text(
+            child: Text(
               'Активен',
-              style: TextStyle(
+              style: GoogleFonts.outfit(
                 fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
@@ -223,47 +226,47 @@ class TitlesSection extends StatelessWidget {
 
   Widget _buildNoActiveTitleCard() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F0EB),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFFAF6F2),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.black.withOpacity(0.04),
           width: 1,
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.grey.withOpacity(0.08),
+              shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.military_tech_outlined,
+              Icons.military_tech_rounded,
               color: Colors.grey[400],
-              size: 20,
+              size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Титул не выбран',
-                  style: TextStyle(
+                  style: GoogleFonts.outfit(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF7A6A5C),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Выберите титул для отображения',
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     color: Colors.grey[500],
                   ),
@@ -280,12 +283,13 @@ class TitlesSection extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Титулы'),
-        content: const Text('Функция выбора титулов будет добавлена в следующем обновлении.'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text('Выбор титула', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text('В следующем обновлении вы сможете настраивать отображение ваших титулов в профиле!', style: GoogleFonts.inter()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text('Понятно', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFC8860A))),
           ),
         ],
       ),
@@ -296,37 +300,37 @@ class TitlesSection extends StatelessWidget {
     try {
       return Color(int.parse(hex.replaceFirst('#', '0xFF')));
     } catch (e) {
-      return const Color(0xFF8B5CF6);
+      return const Color(0xFF6366F1);
     }
   }
 
   IconData _getTitleIcon(String? icon) {
     switch (icon) {
       case 'crown':
-        return Icons.emoji_events_outlined;
+        return Icons.emoji_events_rounded;
       case 'star':
-        return Icons.star_outline;
+        return Icons.stars_rounded;
       case 'trophy':
-        return Icons.emoji_events_outlined;
+        return Icons.emoji_events_rounded;
       case 'coffee':
-        return Icons.coffee_outlined;
+        return Icons.local_cafe_rounded;
       default:
-        return Icons.military_tech_outlined;
+        return Icons.military_tech_rounded;
     }
   }
 
   Color _getRarityColor(String? rarity) {
     switch (rarity) {
       case 'common':
-        return Colors.grey;
+        return Colors.grey.shade600;
       case 'rare':
-        return Colors.blue;
+        return const Color(0xFF1E88E5);
       case 'epic':
-        return Colors.purple;
+        return const Color(0xFF8E24AA);
       case 'legendary':
-        return Colors.orange;
+        return const Color(0xFFC8860A);
       case 'mythic':
-        return Colors.red;
+        return const Color(0xFFD32F2F);
       default:
         return Colors.grey;
     }

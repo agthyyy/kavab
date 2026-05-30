@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kavabanga/features/gamification/presentation/cubit/gamification_cubit.dart';
 import 'package:kavabanga/features/gamification/presentation/widgets/daily_quests_section.dart';
 import 'package:kavabanga/features/gamification/presentation/widgets/titles_section.dart';
@@ -24,17 +25,20 @@ class _GamificationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F0EB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2C1810),
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Геймификация',
-          style: TextStyle(
+        title: Text(
+          'Достижения и Квесты',
+          style: GoogleFonts.outfit(
             color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
         ),
         centerTitle: true,
@@ -42,7 +46,7 @@ class _GamificationView extends StatelessWidget {
           icon: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -64,7 +68,7 @@ class _GamificationView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+                  Icon(Icons.error_outline_rounded, size: 48, color: Colors.grey[450]),
                   const SizedBox(height: 16),
                   Text(state.message,
                       style: TextStyle(color: Colors.grey[600])),
@@ -95,18 +99,18 @@ class _GamificationView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Energy Section
+                    // Секция Энергии
                     EnergySection(energy: state.energy),
                     const SizedBox(height: 20),
 
-                    // Daily Quests Section
+                    // Секция Ежедневных Квестов
                     DailyQuestsSection(
                       quests: state.dailyQuests,
                       completedCount: state.completedQuestsCount,
                     ),
                     const SizedBox(height: 20),
 
-                    // Titles Section
+                    // Секция Титулов
                     TitlesSection(
                       titles: state.titles,
                       activeTitle: state.activeTitle,
@@ -114,7 +118,7 @@ class _GamificationView extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // Collection Section
+                    // Секция Коллекций
                     CollectionSection(
                       cardsCount: state.cardsCount,
                       totalCards: state.totalCardsCount,

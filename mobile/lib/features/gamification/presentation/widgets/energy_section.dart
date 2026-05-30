@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EnergySection extends StatelessWidget {
   final Map<String, dynamic> energy;
@@ -16,22 +17,22 @@ class EnergySection extends StatelessWidget {
     final progress = max > 0 ? current / max : 0.0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF3B82F6),
-            Color(0xFF1D4ED8),
+            Color(0xFF8B5E3C), // Насыщенный цвет зёрен
+            Color(0xFFC8860A), // Кремовый золотой
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3B82F6).withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFFC8860A).withOpacity(0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -41,21 +42,21 @@ class EnergySection extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.bolt,
+                  Icons.bolt_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Энергия',
-                style: TextStyle(
+              Text(
+                'Кофейный заряд',
+                style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -63,107 +64,123 @@ class EnergySection extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   '$current/$max',
-                  style: const TextStyle(
+                  style: GoogleFonts.outfit(
                     fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
-          // Energy Bar
-          Container(
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: progress.clamp(0.0, 1.0),
-              child: Container(
+          // Энергетическая шкала
+          Stack(
+            children: [
+              Container(
+                height: 10,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-            ),
+              FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress.clamp(0.0, 1.0),
+                child: Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           
           Row(
             children: [
               Icon(
-                Icons.refresh,
-                color: Colors.white.withOpacity(0.8),
+                Icons.autorenew_rounded,
+                color: Colors.white.withOpacity(0.85),
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 'Восстановление: $regenRate энергии/час',
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withOpacity(0.85),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
           
           if (current < max) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Row(
               children: [
                 Icon(
-                  Icons.schedule,
-                  color: Colors.white.withOpacity(0.8),
+                  Icons.alarm_rounded,
+                  color: Colors.white.withOpacity(0.85),
                   size: 16,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   _getTimeToFullEnergy(current, max, regenRate),
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withOpacity(0.85),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ],
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           
-          // Energy Tips
+          // Подсказка
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.lightbulb_outline,
-                  color: Colors.white.withOpacity(0.8),
-                  size: 16,
+                const Icon(
+                  Icons.tips_and_updates_rounded,
+                  color: Colors.white,
+                  size: 18,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     _getEnergyTip(current, max),
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.95),
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
                     ),
                   ),
                 ),
@@ -183,11 +200,11 @@ class EnergySection extends StatelessWidget {
     
     if (hoursNeeded < 1) {
       final minutesNeeded = ((energyNeeded / regenRate) * 60).ceil();
-      return 'Полная через $minutesNeeded мин';
+      return 'Полный заряд через $minutesNeeded мин';
     } else if (hoursNeeded == 1) {
-      return 'Полная через 1 час';
+      return 'Полный заряд через 1 час';
     } else {
-      return 'Полная через $hoursNeeded ч';
+      return 'Полный заряд через $hoursNeeded ч';
     }
   }
 
@@ -195,13 +212,13 @@ class EnergySection extends StatelessWidget {
     final percentage = current / max;
     
     if (percentage >= 0.8) {
-      return 'У вас достаточно энергии для изучения!';
+      return 'Заряд на максимуме! Отличное время, чтобы пройти сложный урок.';
     } else if (percentage >= 0.5) {
-      return 'Можете пройти несколько уроков.';
+      return 'Достаточно энергии для прохождения пары тестов.';
     } else if (percentage >= 0.2) {
-      return 'Энергии хватит на один урок.';
+      return 'Заряда хватит на один урок. Используйте его с умом!';
     } else {
-      return 'Энергия заканчивается. Отдохните немного!';
+      return 'Энергия на исходе. Сделайте перерыв на чашечку эспрессо!';
     }
   }
 }

@@ -158,3 +158,15 @@ export async function assignCourse(userId: string, courseId: string): Promise<vo
   // Send FCM push notification to the user (fire-and-forget; errors are logged, not thrown)
   await sendNotificationToUser(userId, 'New course assigned!', course.title as string);
 }
+
+export async function deleteUser(id: string): Promise<void> {
+  const existing = await db('users').where({ id }).first();
+  if (!existing) {
+    const err = new Error('User not found') as Error & { statusCode: number; code: string };
+    err.statusCode = 404;
+    err.code = 'NOT_FOUND';
+    throw err;
+  }
+  await db('users').where({ id }).delete();
+}
+

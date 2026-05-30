@@ -31,7 +31,7 @@ export default function CoursesPage() {
 
   const { data: roles = [] } = useQuery<Role[]>({
     queryKey: ['roles'],
-    queryFn: async () => (await api.get('/admin/roles')).data,
+    queryFn: async () => (await api.get('/roles')).data,
   })
 
   const createMutation = useMutation({

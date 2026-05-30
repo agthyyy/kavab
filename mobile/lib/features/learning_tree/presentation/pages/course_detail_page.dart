@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kavabanga/features/learning_tree/domain/entities/module_node.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_bloc.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_event.dart';
@@ -28,26 +29,39 @@ class _CourseDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F0EB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2C1810),
+        foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: BlocBuilder<LearningTreeBloc, LearningTreeState>(
           builder: (context, state) {
+            String title = 'Карта курса';
             if (state is LearningTreeLoaded) {
-              return Text(
-                state.courseTitle,
-                style: const TextStyle(color: Colors.white),
-              );
+              title = state.courseTitle;
             }
-            return const Text(
-              'Курс',
-              style: TextStyle(color: Colors.white),
+            return Text(
+              title,
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             );
           },
         ),
@@ -72,7 +86,7 @@ class _CourseDetailView extends StatelessWidget {
                       color: Colors.red.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.wifi_off, size: 48, color: Colors.red.shade300),
+                    child: Icon(Icons.wifi_off_rounded, size: 48, color: Colors.red.shade300),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -85,7 +99,7 @@ class _CourseDetailView extends StatelessWidget {
                     onPressed: () => context
                         .read<LearningTreeBloc>()
                         .add(LoadLearningTree(courseId)),
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(Icons.refresh_rounded),
                     label: const Text('Повторить'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFC8860A),
@@ -111,16 +125,17 @@ class _CourseDetailView extends StatelessWidget {
                         color: const Color(0xFFC8860A).withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.folder_open,
+                      child: const Icon(Icons.folder_open_rounded,
                           size: 56, color: Color(0xFFC8860A)),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Нет модулей',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C1810)),
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF2C1810),
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -173,7 +188,7 @@ class _CourseDetailView extends StatelessWidget {
             SnackBar(
               content: const Text('В этом модуле пока нет уроков'),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -181,16 +196,19 @@ class _CourseDetailView extends StatelessWidget {
       case ModuleStatus.locked:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.lock, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text('Сначала завершите предыдущий модуль'),
+                const Icon(Icons.lock_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Сначала завершите предыдущий модуль',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ],
             ),
             behavior: SnackBarBehavior.floating,
             backgroundColor: const Color(0xFF2C1810),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
         break;

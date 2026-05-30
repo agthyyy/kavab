@@ -51,3 +51,4 @@ check-users.js
 create-test-user.js
 reset-password.js
 create-test-user-db.js
+.kiro/

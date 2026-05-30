@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kavabanga/features/learning_tree/domain/entities/module_node.dart';
 import 'dart:math' as math;
 
@@ -32,12 +33,12 @@ class LearningPathMap extends StatelessWidget {
     final alignment = isLeft ? Alignment.centerLeft : Alignment.centerRight;
     
     return Container(
-      height: 160,
+      height: 170,
       alignment: alignment,
       padding: EdgeInsets.only(
         left: isLeft ? 16 : 80,
         right: isLeft ? 80 : 16,
-        bottom: 20,
+        bottom: 24,
       ),
       child: GestureDetector(
         onTap: module.status != ModuleStatus.locked ? () => onModuleTap(module) : null,
@@ -64,19 +65,19 @@ class _ModuleNodeCard extends StatelessWidget {
     String statusText;
     
     if (isCompleted) {
-      bgColor = const Color(0xFF4CAF50).withOpacity(0.1);
-      borderColor = const Color(0xFF4CAF50);
-      icon = Icons.check_circle;
+      bgColor = const Color(0xFF2E7D32).withOpacity(0.08);
+      borderColor = const Color(0xFF2E7D32);
+      icon = Icons.check_circle_rounded;
       statusText = 'Завершено';
     } else if (isLocked) {
       bgColor = Colors.grey.shade100;
-      borderColor = Colors.grey.shade300;
-      icon = Icons.lock;
+      borderColor = Colors.grey.shade400;
+      icon = Icons.lock_outline_rounded;
       statusText = 'Заблокировано';
     } else {
-      bgColor = const Color(0xFFC8860A).withOpacity(0.1);
+      bgColor = const Color(0xFFC8860A).withOpacity(0.08);
       borderColor = const Color(0xFFC8860A);
-      icon = Icons.play_circle_filled;
+      icon = Icons.play_arrow_rounded;
       statusText = 'Доступно';
     }
 
@@ -84,13 +85,16 @@ class _ModuleNodeCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor, width: 3),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isLocked ? Colors.black.withOpacity(0.05) : borderColor.withOpacity(0.25),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: borderColor.withOpacity(0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: isLocked ? Colors.transparent : borderColor.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -100,34 +104,39 @@ class _ModuleNodeCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              // Стильная круглая иконка
               Container(
-                padding: const EdgeInsets.all(8),
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.circular(12),
+                  shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: borderColor, size: 24),
+                child: Icon(icon, color: borderColor, size: 22),
               ),
               const SizedBox(width: 12),
+              
+              // Название
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Модуль ${index + 1}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
+                      'МОДУЛЬ ${index + 1}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        color: const Color(0xFF7A6A5C),
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       module.title,
-                      style: TextStyle(
+                      style: GoogleFonts.outfit(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: isLocked ? Colors.grey[400] : const Color(0xFF1A1A1A),
+                        color: isLocked ? Colors.grey[400] : const Color(0xFF2C1810),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -137,18 +146,19 @@ class _ModuleNodeCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // Текстовый бейдж состояния
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               statusText,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
                 color: borderColor,
               ),
             ),
@@ -169,7 +179,7 @@ class _PathPainter extends CustomPainter {
     if (modules.length < 2) return;
 
     final paint = Paint()
-      ..color = const Color(0xFFD4A574).withOpacity(0.3)
+      ..color = const Color(0xFFC8860A).withOpacity(0.4)
       ..strokeWidth = 4
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -186,8 +196,8 @@ class _PathPainter extends CustomPainter {
       final isLeft = i % 2 == 0;
       final nextIsLeft = (i + 1) % 2 == 0;
       
-      final startY = (i * 160) + 80.0;
-      final endY = ((i + 1) * 160) + 80.0;
+      final startY = (i * 170) + 70.0;
+      final endY = ((i + 1) * 170) + 70.0;
       
       final startX = isLeft ? size.width * 0.25 : size.width * 0.75;
       final endX = nextIsLeft ? size.width * 0.25 : size.width * 0.75;
@@ -199,17 +209,17 @@ class _PathPainter extends CustomPainter {
         path.moveTo(startX, startY);
       }
 
-      // Используем разные стили для завершенных и незавершенных путей
-      final currentPaint = modules[i].status == ModuleStatus.completed ? paint : dashPaint;
+      final isSegmentCompleted = modules[i].status == ModuleStatus.completed && 
+                                 modules[i + 1].status != ModuleStatus.locked;
+      final currentPaint = isSegmentCompleted ? paint : dashPaint;
       
       final segmentPath = Path();
       segmentPath.moveTo(startX, startY);
       segmentPath.quadraticBezierTo(controlX, controlY, endX, endY);
       
-      canvas.drawPath(segmentPath, currentPaint);
-      
-      // Рисуем пунктир для незавершенных
-      if (modules[i].status != ModuleStatus.completed) {
+      if (isSegmentCompleted) {
+        canvas.drawPath(segmentPath, currentPaint);
+      } else {
         _drawDashedPath(canvas, segmentPath, dashPaint);
       }
     }

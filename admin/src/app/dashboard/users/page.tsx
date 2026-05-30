@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { UserPlus, Pencil, UserX } from 'lucide-react'
+import { UserPlus, Pencil, UserX, Trash2 } from 'lucide-react'
 
 interface User {
   id: string
@@ -56,6 +56,11 @@ export default function UsersPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); setEditUser(null) },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/admin/users/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+  })
+
   if (isLoading) return <div>Loading...</div>
 
   return (
@@ -105,14 +110,26 @@ export default function UsersPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 flex gap-2">
-                  <button onClick={() => setEditUser(u)} className="text-gray-400 hover:text-brand">
+                  <button onClick={() => setEditUser(u)} className="text-gray-400 hover:text-brand" title="Edit">
                     <Pencil size={16} />
                   </button>
                   <button
                     onClick={() => updateMutation.mutate({ id: u.id, data: { isActive: !(u.isActive ?? u.is_active) } })}
-                    className="text-gray-400 hover:text-red-500"
+                    className="text-gray-400 hover:text-amber-500"
+                    title={(u.isActive ?? u.is_active) ? "Deactivate" : "Activate"}
                   >
                     <UserX size={16} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to delete ${u.fullName || u.full_name}?`)) {
+                        deleteMutation.mutate(u.id);
+                      }
+                    }}
+                    className="text-gray-400 hover:text-red-600"
+                    title="Delete Employee"
+                  >
+                    <Trash2 size={16} />
                   </button>
                 </td>
               </tr>

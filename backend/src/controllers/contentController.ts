@@ -257,7 +257,13 @@ export async function createAchievementTrigger(req: Request, res: Response, next
 
 export async function listCourses(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const courses = await contentService.getAllCourses();
+    let courses;
+    // Check if the request comes from the admin panel (includes /admin)
+    if (req.baseUrl.includes('/admin')) {
+      courses = await contentService.getAllCourses();
+    } else {
+      courses = await contentService.getCoursesForUser(req.user!.id);
+    }
     res.status(200).json(courses);
   } catch (err) {
     next(err);

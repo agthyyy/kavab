@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kavabanga/features/learning_tree/domain/entities/course_entity.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_bloc.dart';
 import 'package:kavabanga/features/learning_tree/presentation/bloc/learning_tree_event.dart';
@@ -31,16 +32,20 @@ class _HomeView extends StatefulWidget {
 class _HomeViewState extends State<_HomeView> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F0EB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2C1810),
+        foregroundColor: Colors.white,
         elevation: 0,
         title: SvgPicture.asset(
           'assets/images/logo.svg',
-          height: 36,
+          height: 32,
           fit: BoxFit.contain,
-          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(Color(0xFFE2B275), BlendMode.srcIn),
         ),
         centerTitle: true,
         actions: [
@@ -48,12 +53,13 @@ class _HomeViewState extends State<_HomeView> {
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
               icon: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
                 ),
-                child: const Icon(Icons.person_outline, color: Colors.white, size: 20),
+                child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
               ),
               onPressed: _goToProfile,
             ),
@@ -79,7 +85,7 @@ class _HomeViewState extends State<_HomeView> {
                       color: Colors.red.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.wifi_off, size: 48, color: Colors.red.shade300),
+                    child: Icon(Icons.wifi_off_rounded, size: 48, color: Colors.red.shade300),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -92,8 +98,8 @@ class _HomeViewState extends State<_HomeView> {
                     onPressed: () => context
                         .read<LearningTreeBloc>()
                         .add(const LoadCourses()),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Повторить'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFC8860A),
                       foregroundColor: Colors.white,
@@ -121,12 +127,13 @@ class _HomeViewState extends State<_HomeView> {
                         size: 56, color: Color(0xFFC8860A)),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Нет курсов',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C1810)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF2C1810),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -152,22 +159,23 @@ class _HomeViewState extends State<_HomeView> {
                 child: Column(
                   children: [
                     ProgressHeader(progress: state.progress),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           'Мои курсы',
-                          style: const TextStyle(
+                          style: GoogleFonts.outfit(
                             fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2C1810),
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : const Color(0xFF2C1810),
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     ...state.courses.map((course) => CourseCard(
                           course: course,
                           onTap: () => _onCourseTap(context, course),

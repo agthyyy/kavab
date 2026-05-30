@@ -75,3 +75,14 @@ export async function assignCourse(req: Request, res: Response, next: NextFuncti
     next(err);
   }
 }
+
+export async function deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    await userService.deleteUser(id);
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+}
+

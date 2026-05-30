@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DailyQuestsSection extends StatelessWidget {
   final List<dynamic> quests;
@@ -13,15 +14,16 @@ class DailyQuestsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.black.withOpacity(0.04), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -33,58 +35,52 @@ class DailyQuestsSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFC8860A).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFFC8860A).withOpacity(0.08),
+                  shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.assignment_outlined,
+                  Icons.assignment_rounded,
                   color: Color(0xFFC8860A),
-                  size: 20,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Ежедневные задания',
-                style: TextStyle(
+              Text(
+                'Задания дня',
+                style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C1810),
+                  color: const Color(0xFF2C1810),
                 ),
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: completedCount == quests.length
-                      ? Colors.green.withOpacity(0.1)
-                      : const Color(0xFFC8860A).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                      ? const Color(0xFF2E7D32).withOpacity(0.08)
+                      : const Color(0xFFC8860A).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Text(
                   '$completedCount/${quests.length}',
-                  style: TextStyle(
+                  style: GoogleFonts.outfit(
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: completedCount == quests.length
-                        ? Colors.green[700]
+                        ? const Color(0xFF2E7D32)
                         : const Color(0xFFC8860A),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           if (quests.isEmpty)
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: Text(
-                  'Задания на сегодня загружаются...',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                ),
+                child: CircularProgressIndicator(color: Color(0xFFC8860A)),
               ),
             )
           else
@@ -102,82 +98,97 @@ class DailyQuestsSection extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isCompleted 
-            ? Colors.green.withOpacity(0.05)
-            : const Color(0xFFF5F0EB),
-        borderRadius: BorderRadius.circular(12),
+            ? const Color(0xFF2E7D32).withOpacity(0.03)
+            : const Color(0xFFFAF6F2),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isCompleted 
-              ? Colors.green.withOpacity(0.2)
+              ? const Color(0xFF2E7D32).withOpacity(0.15)
               : Colors.transparent,
           width: 1,
         ),
       ),
       child: Row(
         children: [
+          // Круглый бейдж иконки задания
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: isCompleted 
-                  ? Colors.green.withOpacity(0.1)
-                  : const Color(0xFFC8860A).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+                  ? const Color(0xFF2E7D32).withOpacity(0.08)
+                  : const Color(0xFFC8860A).withOpacity(0.08),
+              shape: BoxShape.circle,
             ),
             child: Icon(
               _getQuestIcon(quest['questType']),
               color: isCompleted 
-                  ? Colors.green[700]
+                  ? const Color(0xFF2E7D32)
                   : const Color(0xFFC8860A),
               size: 20,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   quest['title'] ?? 'Задание',
-                  style: TextStyle(
+                  style: GoogleFonts.outfit(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: isCompleted 
-                        ? Colors.green[700]
+                        ? const Color(0xFF2E7D32)
                         : const Color(0xFF2C1810),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   quest['description'] ?? '',
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: const Color(0xFF7A6A5C),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
-                      child: LinearProgressIndicator(
-                        value: progress.clamp(0.0, 1.0),
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          isCompleted 
-                              ? Colors.green
-                              : const Color(0xFFC8860A),
-                        ),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: progress.clamp(0.0, 1.0),
+                            child: Container(
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: isCompleted 
+                                    ? const Color(0xFF2E7D32)
+                                    : const Color(0xFFC8860A),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Text(
                       '$currentProgress/$targetValue',
-                      style: TextStyle(
+                      style: GoogleFonts.outfit(
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF7A6A5C),
                       ),
                     ),
                   ],
@@ -185,33 +196,33 @@ class DailyQuestsSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           if (isCompleted)
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(12),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2E7D32),
+                shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.check,
+                Icons.check_rounded,
                 color: Colors.white,
-                size: 16,
+                size: 14,
               ),
             )
           else
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFC8860A).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFC8860A).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 '+${quest['xpReward'] ?? 0} XP',
-                style: const TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFC8860A),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFC8860A),
                 ),
               ),
             ),
@@ -223,15 +234,17 @@ class DailyQuestsSection extends StatelessWidget {
   IconData _getQuestIcon(String? questType) {
     switch (questType) {
       case 'complete_lessons':
-        return Icons.school_outlined;
+        return Icons.auto_stories_rounded;
+      case 'perfect_quiz':
+        return Icons.verified_rounded;
       case 'pass_quizzes':
-        return Icons.quiz_outlined;
+        return Icons.quiz_rounded;
       case 'earn_xp':
-        return Icons.star_outline;
+        return Icons.stars_rounded;
       case 'login_streak':
-        return Icons.calendar_today_outlined;
+        return Icons.local_fire_department_rounded;
       default:
-        return Icons.assignment_outlined;
+        return Icons.assignment_turned_in_rounded;
     }
   }
 }

@@ -101,18 +101,40 @@ export async function checkAndAwardAchievements(
   userId: string,
   context: AchievementCheckContext
 ): Promise<AwardedAchievement[]> {
-  // Load all achievements
-  const achievements = await db('achievements').select(
-    'id',
-    'title',
-    'description',
-    'condition_type',
-    'condition_value',
-    'icon',
-    'rarity',
-    'xp_reward',
-    'category'
-  );
+  // Load user's role_id
+  const user = await db('users').where({ id: userId }).select('role_id').first();
+  if (!user) return [];
+  const userRoleId = user.role_id;
+
+  // Load achievements available for user's role
+  const achievements = await db('achievements')
+    .leftJoin('achievement_roles', 'achievements.id', '=', 'achievement_roles.achievement_id')
+    .where(function() {
+      this.where('achievements.is_global', true)
+        .orWhere('achievement_roles.role_id', userRoleId);
+    })
+    .distinct(
+      'achievements.id',
+      'achievements.title',
+      'achievements.description',
+      'achievements.condition_type',
+      'achievements.condition_value',
+      'achievements.icon',
+      'achievements.rarity',
+      'achievements.xp_reward',
+      'achievements.category'
+    )
+    .select(
+      'achievements.id',
+      'achievements.title',
+      'achievements.description',
+      'achievements.condition_type',
+      'achievements.condition_value',
+      'achievements.icon',
+      'achievements.rarity',
+      'achievements.xp_reward',
+      'achievements.category'
+    );
 
   if (achievements.length === 0) return [];
 
@@ -185,11 +207,32 @@ export async function checkLessonAchievements(
   lessonId: string,
   context: AchievementCheckContext
 ): Promise<AwardedAchievement[]> {
+  // Load user's role_id
+  const user = await db('users').where({ id: userId }).select('role_id').first();
+  if (!user) return [];
+  const userRoleId = user.role_id;
+
   // Get lesson-specific achievements through triggers
   const lessonAchievements = await db('achievements')
     .join('achievement_triggers', 'achievements.id', '=', 'achievement_triggers.achievement_id')
+    .leftJoin('achievement_roles', 'achievements.id', '=', 'achievement_roles.achievement_id')
     .where('achievement_triggers.trigger_type', 'lesson_complete')
     .where('achievement_triggers.trigger_value', lessonId)
+    .where(function() {
+      this.where('achievements.is_global', true)
+        .orWhere('achievement_roles.role_id', userRoleId);
+    })
+    .distinct(
+      'achievements.id',
+      'achievements.title',
+      'achievements.description',
+      'achievements.condition_type',
+      'achievements.condition_value',
+      'achievements.icon',
+      'achievements.rarity',
+      'achievements.xp_reward',
+      'achievements.category'
+    )
     .select(
       'achievements.id',
       'achievements.title',

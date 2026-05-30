@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kavabanga/core/network/api_client.dart';
 import 'package:kavabanga/core/network/api_constants.dart';
 import 'package:kavabanga/features/auth/presentation/cubit/auth_cubit.dart';
@@ -54,22 +55,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F0EB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2C1810),
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Профиль',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: true,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -82,10 +86,10 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
               icon: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.logout_rounded,
                     color: Colors.white, size: 18),
@@ -104,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+                      Icon(Icons.error_outline_rounded, size: 48, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(_error!, style: TextStyle(color: Colors.grey[600])),
                       const SizedBox(height: 16),
@@ -132,9 +136,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         _HeroCard(progress: _progress!),
                         const SizedBox(height: 16),
                         _StatsRow(progress: _progress!),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         _RankingLoader(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         _AchievementsSection(achievements: _progress!.achievements),
                         const SizedBox(height: 24),
                       ],
@@ -160,91 +164,119 @@ class _HeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2C1810), Color(0xFF4A2C2A)],
+          colors: [
+            Color(0xFF23120B), // Эспрессо
+            Color(0xFF3C2012), // Теплый какао
+            Color(0xFF4E2C1B), // Шоколад
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2C1810).withOpacity(0.3),
+            color: const Color(0xFF23120B).withOpacity(0.35),
             blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         children: [
+          // Аватар
           Container(
-            width: 72,
-            height: 72,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFFC8860A),
-              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFC8860A), Color(0xFFE2B275)],
+              ),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFC8860A).withOpacity(0.4),
+                  color: const Color(0xFFC8860A).withOpacity(0.3),
                   blurRadius: 16,
-                  offset: const Offset(0, 4),
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
             child: const Icon(Icons.person_rounded,
-                size: 40, color: Colors.white),
+                size: 44, color: Colors.white),
           ),
           const SizedBox(height: 16),
+          
+          // Имя пользователя
           Text(
             progress.userName ?? 'Пользователь',
-            style: const TextStyle(
+            style: GoogleFonts.outfit(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              letterSpacing: -0.2,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
+          
+          // Бейдж уровня
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFC8860A).withOpacity(0.2),
+              color: const Color(0xFFC8860A).withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: const Color(0xFFC8860A).withOpacity(0.4)),
+                  color: const Color(0xFFC8860A).withOpacity(0.4), width: 1.5),
             ),
             child: Text(
-              'Level ${progress.currentLevel}',
-              style: const TextStyle(
-                color: Color(0xFFC8860A),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+              'Уровень ${progress.currentLevel}',
+              style: GoogleFonts.outfit(
+                color: const Color(0xFFE2B275),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
+          
+          // XP Прогрессбар
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '${progress.totalXp} XP',
-                style: const TextStyle(
-                    color: Colors.white70, fontSize: 13),
+                style: GoogleFonts.outfit(
+                    color: Colors.white.withOpacity(0.9), fontSize: 13, fontWeight: FontWeight.w600),
               ),
               Text(
-                '${xpForNext} XP',
-                style: const TextStyle(
-                    color: Colors.white38, fontSize: 13),
+                '${xpForNext} XP до уровня ${progress.currentLevel + 1}',
+                style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.4), fontSize: 11),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: xpPercent,
-              minHeight: 8,
-              backgroundColor: Colors.white12,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(Color(0xFFC8860A)),
-            ),
+          const SizedBox(height: 10),
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: xpPercent,
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFC8860A), Color(0xFFE2B275)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -262,20 +294,20 @@ class _StatsRow extends StatelessWidget {
       children: [
         _StatCard(
           icon: Icons.local_fire_department_rounded,
-          color: const Color(0xFFFF6B35),
+          color: const Color(0xFFFF7A45),
           value: '${progress.streakDays}',
           label: 'Дней подряд',
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         _StatCard(
-          icon: Icons.menu_book_rounded,
-          color: const Color(0xFF4A2C2A),
+          icon: Icons.auto_stories_rounded,
+          color: const Color(0xFF8B5E3C),
           value: '${progress.completedLessons}',
-          label: 'Уроков пройдено',
+          label: 'Уроков',
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         _StatCard(
-          icon: Icons.pie_chart_rounded,
+          icon: Icons.donut_large_rounded,
           color: const Color(0xFFC8860A),
           value: '${progress.courseCompletionPercent}%',
           label: 'Завершено',
@@ -302,42 +334,43 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black.withOpacity(0.04), width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: color.withOpacity(0.08),
+                shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: color, size: 24),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               value,
-              style: TextStyle(
-                fontSize: 18,
+              style: GoogleFonts.outfit(
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF7A6A5C), fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -353,13 +386,13 @@ class _AchievementsSection extends StatelessWidget {
   Color _getRarityColor(String rarity) {
     switch (rarity) {
       case 'common':
-        return Colors.grey;
+        return Colors.grey.shade600;
       case 'rare':
-        return const Color(0xFF4A90E2);
+        return const Color(0xFF1E88E5);
       case 'epic':
-        return const Color(0xFF9B59B6);
+        return const Color(0xFF8E24AA);
       case 'legendary':
-        return const Color(0xFFD4AF37);
+        return const Color(0xFFC8860A);
       default:
         return Colors.grey;
     }
@@ -384,6 +417,8 @@ class _AchievementsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final earnedAchievements = achievements.where((a) => a.isEarned).toList();
     final inProgressAchievements = achievements.where((a) => !a.isEarned && a.progress > 0).toList();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,44 +426,45 @@ class _AchievementsSection extends StatelessWidget {
         Row(
           children: [
             const Icon(Icons.emoji_events_rounded,
-                color: Color(0xFFC8860A), size: 22),
+                color: Color(0xFFC8860A), size: 24),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Достижения',
-              style: TextStyle(
-                fontSize: 18,
+              style: GoogleFonts.outfit(
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A1A),
+                color: isDark ? Colors.white : const Color(0xFF2C1810),
               ),
             ),
             const Spacer(),
             if (achievements.isNotEmpty)
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFC8860A).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xFFC8860A).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   '${earnedAchievements.length}/${achievements.length}',
-                  style: const TextStyle(
-                    color: Color(0xFFC8860A),
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xFFC8860A),
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         if (achievements.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.black.withOpacity(0.04)),
             ),
             child: Column(
               children: [
@@ -445,17 +481,18 @@ class _AchievementsSection extends StatelessWidget {
         else ...[
           // Earned achievements
           if (earnedAchievements.isNotEmpty) ...[
-            const Text(
-              'Получено',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF666666),
+            Text(
+              'ПОЛУЧЕНО',
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF7A6A5C),
+                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 8),
             SizedBox(
-              height: 130, // Уменьшил высоту
+              height: 160,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: earnedAchievements.length,
@@ -463,16 +500,17 @@ class _AchievementsSection extends StatelessWidget {
                     _buildAchievementCard(earnedAchievements[i], true),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
           ],
           // In progress achievements
           if (inProgressAchievements.isNotEmpty) ...[
-            const Text(
-              'В процессе',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF666666),
+            Text(
+              'В ПРОЦЕССЕ',
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF7A6A5C),
+                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 8),
@@ -487,76 +525,75 @@ class _AchievementsSection extends StatelessWidget {
     final rarityColor = _getRarityColor(achievement.rarity);
 
     return Container(
-      width: 110, // Уменьшил ширину
-      margin: const EdgeInsets.only(right: 12),
+      width: 120,
+      margin: const EdgeInsets.only(right: 12, bottom: 4),
       decoration: BoxDecoration(
-        gradient: earned
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  rarityColor.withOpacity(0.1),
-                  rarityColor.withOpacity(0.05),
-                ],
-              )
-            : null,
-        color: earned ? null : Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: earned ? rarityColor.withOpacity(0.3) : Colors.grey[300]!,
-          width: 2,
+          color: earned ? rarityColor.withOpacity(0.2) : Colors.grey[300]!,
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: earned ? rarityColor.withOpacity(0.04) : Colors.transparent,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(12),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              achievement.icon,
-              style: TextStyle(
-                fontSize: earned ? 28 : 22,
-                color: earned ? null : Colors.grey[400],
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: rarityColor.withOpacity(0.08),
+                shape: BoxShape.circle,
               ),
+              child: Text(
+                achievement.icon,
+                style: const TextStyle(fontSize: 28),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              achievement.name,
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2C1810),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            Flexible(
-              child: Text(
-                achievement.name,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: earned ? const Color(0xFF1A1A2E) : Colors.grey[500],
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 3),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: rarityColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
+                color: rarityColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 _getRarityName(achievement.rarity),
                 style: TextStyle(
                   fontSize: 8,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.bold,
                   color: rarityColor,
                 ),
               ),
             ),
             if (earned) ...[
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 '+${achievement.xpReward} XP',
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFC8860A),
+                style: GoogleFonts.outfit(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFC8860A),
                 ),
               ),
             ],
@@ -570,72 +607,91 @@ class _AchievementsSection extends StatelessWidget {
     final rarityColor = _getRarityColor(achievement.rarity);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black.withOpacity(0.04), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.01),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: rarityColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: rarityColor.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
               child: Text(
                 achievement.icon,
-                style: const TextStyle(fontSize: 24),
+                style: const TextStyle(fontSize: 26),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   achievement.name,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E),
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2C1810),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   achievement.description,
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: const Color(0xFF7A6A5C),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: achievement.progress,
-                          backgroundColor: Colors.grey[200],
-                          valueColor: AlwaysStoppedAnimation(rarityColor),
-                          minHeight: 5,
-                        ),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: achievement.progress.clamp(0.0, 1.0),
+                            child: Container(
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: rarityColor,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Text(
                       '${achievement.progressCurrent}/${achievement.progressTotal}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                         color: rarityColor,
                       ),
                     ),
@@ -649,8 +705,6 @@ class _AchievementsSection extends StatelessWidget {
     );
   }
 }
-
-
 
 class _RankingLoader extends StatefulWidget {
   const _RankingLoader();
@@ -698,7 +752,8 @@ class _RankingLoaderState extends State<_RankingLoader> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black.withOpacity(0.04)),
         ),
         child: const Center(
           child: CircularProgressIndicator(color: Color(0xFFC8860A)),
@@ -711,11 +766,12 @@ class _RankingLoaderState extends State<_RankingLoader> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black.withOpacity(0.04)),
         ),
         child: Column(
           children: [
-            Icon(Icons.error_outline, size: 40, color: Colors.grey[400]),
+            Icon(Icons.error_outline_rounded, size: 40, color: Colors.grey[400]),
             const SizedBox(height: 8),
             Text(
               'Не удалось загрузить рейтинг',

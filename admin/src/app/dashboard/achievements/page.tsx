@@ -73,7 +73,7 @@ export default function AchievementsPage() {
 
   const { data: roles = [] } = useQuery<Array<{ id: string; name: string }>>({
     queryKey: ['roles'],
-    queryFn: async () => (await api.get('/admin/roles')).data,
+    queryFn: async () => (await api.get('/roles')).data,
   })
 
   const createMutation = useMutation({

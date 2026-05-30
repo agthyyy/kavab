@@ -380,17 +380,29 @@ export async function generateUploadUrl(data: {
 
 // ── Content read endpoints ────────────────────────────────────────────────────
 
-export async function getCoursesForUser(userId: string): Promise<CourseRecord[]> {
-  const user = await db('users').where({ id: userId }).select('role_id').first();
+export async function getCoursesForUser(userId: string): Promise<Record<string, unknown>[]> {
+  const user = await db('users')
+    .join('roles', 'users.role_id', 'roles.id')
+    .where('users.id', userId)
+    .select('users.role_id', 'roles.name as roleName')
+    .first();
   if (!user) throw makeError('User not found', 404, 'NOT_FOUND');
   
-  const allCourses = await db('courses').where({ is_published: true }).select('id', 'title', 'description', 'is_published', 'created_at');
-  const result: CourseRecord[] = [];
+  const allCourses = await db('courses')
+    .where({ is_published: true })
+    .orderBy('created_at', 'desc')
+    .select('id', 'title', 'description', 'is_published', 'created_at');
+  const result: Record<string, unknown>[] = [];
   
   for (const course of allCourses) {
+    if (user.roleName === 'admin') {
+      result.push(course);
+      continue;
+    }
+    
     const courseRoles = await db('course_roles').where({ course_id: course.id }).select('role_id');
     if (courseRoles.length === 0 || courseRoles.some(cr => cr.role_id === user.role_id)) {
-      result.push(mapCourse(course));
+      result.push(course);
     }
   }
   
@@ -413,8 +425,9 @@ export async function getLessonsByModule(moduleId: string): Promise<Record<strin
 export async function getCourseTree(courseId: string, userId: string): Promise<ModuleWithStatus[]> {
   // Получаем роль пользователя
   const user = await db('users')
-    .where({ id: userId })
-    .select('role_id')
+    .join('roles', 'users.role_id', 'roles.id')
+    .where('users.id', userId)
+    .select('users.role_id', 'roles.name as roleName')
     .first();
 
   if (!user) {
@@ -422,16 +435,22 @@ export async function getCourseTree(courseId: string, userId: string): Promise<M
   }
 
   // Получаем модули, доступные для роли пользователя
-  const modules = await db('modules')
-    .where('modules.course_id', courseId)
-    .leftJoin('module_roles', 'modules.id', 'module_roles.module_id')
-    .where(function() {
-      // Модуль доступен если:
-      // 1. У него нет привязки к ролям (доступен всем)
-      // 2. Или он привязан к роли пользователя
-      this.whereNull('module_roles.role_id')
-        .orWhere('module_roles.role_id', user.role_id);
-    })
+  let query = db('modules')
+    .where('modules.course_id', courseId);
+
+  if (user.roleName !== 'admin') {
+    query = query
+      .leftJoin('module_roles', 'modules.id', 'module_roles.module_id')
+      .where(function() {
+        // Модуль доступен если:
+        // 1. У него нет привязки к ролям (доступен всем)
+        // 2. Или он привязан к роли пользователя
+        this.whereNull('module_roles.role_id')
+          .orWhere('module_roles.role_id', user.role_id);
+      });
+  }
+
+  const modules = await query
     .distinct('modules.id', 'modules.course_id', 'modules.title', 'modules.order_index', 'modules.pass_threshold')
     .orderBy('modules.order_index', 'asc')
     .select('modules.id', 'modules.course_id', 'modules.title', 'modules.order_index', 'modules.pass_threshold');

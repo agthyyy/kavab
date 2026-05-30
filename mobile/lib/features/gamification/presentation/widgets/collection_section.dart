@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CollectionSection extends StatelessWidget {
   final int cardsCount;
@@ -17,22 +18,22 @@ class CollectionSection extends StatelessWidget {
     final completionPercentage = totalCards > 0 ? (cardsCount / totalCards * 100).round() : 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFFEC4899),
-            Color(0xFFBE185D),
+            Color(0xFF8E24AA), // Яркие ноты ягодного кофе
+            Color(0xFFD81B60), // Розовая пенка
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFEC4899).withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFFD81B60).withOpacity(0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -44,19 +45,19 @@ class CollectionSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.collections_outlined,
+                  Icons.style_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Коллекция карт',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -64,25 +65,25 @@ class CollectionSection extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Text(
                   '$completionPercentage%',
-                  style: const TextStyle(
+                  style: GoogleFonts.outfit(
                     fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
-          // Collection Stats
+          // Статистика коллекции
           Row(
             children: [
               Expanded(
@@ -105,14 +106,14 @@ class CollectionSection extends StatelessWidget {
             ],
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           
-          // Progress Bar
+          // Прогрессбар
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,67 +122,85 @@ class CollectionSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Прогресс коллекции',
-                      style: TextStyle(
+                      'Прогресс сбора карт',
+                      style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withOpacity(0.85),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       '$cardsCount/$totalCards',
-                      style: TextStyle(
+                      style: GoogleFonts.outfit(
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: totalCards > 0 ? cardsCount / totalCards : 0.0,
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                const SizedBox(height: 10),
+                Stack(
+                  children: [
+                    Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: totalCards > 0 ? (cardsCount / totalCards).clamp(0.0, 1.0) : 0.0,
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           
-          // Collection Tip
+          // Полезная подсказка
           GestureDetector(
             onTap: () => _showCollectionInfo(context),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withOpacity(0.15),
                   width: 1,
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.white.withOpacity(0.8),
-                    size: 16,
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.white,
+                    size: 18,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _getCollectionTip(cardsCount, totalCards),
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withOpacity(0.95),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                   Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white.withOpacity(0.6),
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white.withOpacity(0.65),
                     size: 12,
                   ),
                 ],
@@ -200,10 +219,10 @@ class CollectionSection extends StatelessWidget {
     required String subtitle,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,33 +231,35 @@ class CollectionSection extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: Colors.white,
+                color: Colors.white.withOpacity(0.9),
                 size: 16,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Text(
                 label,
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: 11,
                   color: Colors.white.withOpacity(0.8),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
+            style: GoogleFonts.outfit(
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             subtitle,
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.white.withOpacity(0.7),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              color: Colors.white.withOpacity(0.6),
             ),
           ),
         ],
@@ -250,15 +271,15 @@ class CollectionSection extends StatelessWidget {
     if (current == 0) {
       return 'Проходите уроки и квизы, чтобы получить первые карты!';
     } else if (current < total * 0.25) {
-      return 'Отличное начало! Продолжайте изучать кофе.';
+      return 'Отличное начало! Продолжайте изучать кофейные секреты.';
     } else if (current < total * 0.5) {
-      return 'Хорошая коллекция! Ищите редкие карты.';
+      return 'Хорошая коллекция! Ищите редкие и легендарные сорта.';
     } else if (current < total * 0.75) {
-      return 'Впечатляющая коллекция! Осталось немного.';
+      return 'Впечатляющая коллекция! Осталось совсем немного.';
     } else if (current < total) {
-      return 'Почти завершена! Найдите последние карты.';
+      return 'Коллекция почти завершена! Найдите последние редкие экземпляры.';
     } else {
-      return 'Поздравляем! Коллекция полная!';
+      return 'Поздравляем! Ваша коллекция кофейных карт полностью собрана!';
     }
   }
 
@@ -266,16 +287,18 @@ class CollectionSection extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('О коллекции'),
-        content: const Text(
-          'Карты выпадают случайно при прохождении уроков и квизов. '
-          'Редкие карты имеют меньший шанс выпадения, но они особенно ценны!\n\n'
-          'Собирайте карты, чтобы изучить больше о мире кофе.',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text('О кофейной коллекции', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text(
+          'Каждая карта представляет собой кофейный сорт, регион или рецепт. '
+          'Они выпадают случайным образом за завершение уроков и квизов.\n\n'
+          'Соберите их все, чтобы стать настоящим мастером вкуса!',
+          style: GoogleFonts.inter(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Понятно'),
+            child: Text('Понятно', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFC8860A))),
           ),
         ],
       ),
